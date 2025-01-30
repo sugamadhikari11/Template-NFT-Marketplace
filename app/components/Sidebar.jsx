@@ -20,7 +20,7 @@ export default function Sidebar({ darkMode, setDarkMode, sidebarOpen, setSidebar
         </li>
         <li className="mb-4 p-2 flex items-center hover:bg-gray-700 rounded cursor-pointer" onClick={() => setCurrentPage("products")}>
           <Package className="w-6 h-6" />
-          {sidebarOpen && <span className="ml-2">Products</span>}
+          {sidebarOpen && <span className="ml-2">Auction</span>}
         </li>
         <li className="mb-4 p-2 flex items-center hover:bg-gray-700 rounded cursor-pointer">
           <Settings className="w-6 h-6" />
