@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from "react";
-import { Moon, Sun, ChevronLeft, ChevronRight, Home, Package, Settings } from "lucide-react";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
 import HomePage from "./components/HomePage";
@@ -9,21 +8,31 @@ import RunningAuctionPage from "./components/RunningAuctionPage";
 import PendingAuctionPage from "./components/PendingAuctionPage";
 
 export default function MarketplaceUI() {
-  const [darkMode, setDarkMode] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [darkMode, setDarkMode] = useState(()=>{
+    return localStorage.getItem("darkMode")=="true";
+  });
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    return localStorage.getItem('sidebarOpen') === "true";  // Convert to boolean
+  });  
   const [currentPage, setCurrentPage] = useState(() => {
-    // Retrieve the current page from localStorage or default to "home"
     return localStorage.getItem('currentPage') || "home";
   });
 
-  // Effect to update localStorage whenever currentPage changes
   useEffect(() => {
     localStorage.setItem('currentPage', currentPage);
   }, [currentPage]);
 
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', String(sidebarOpen)); // Convert boolean to string
+  }, [sidebarOpen]);
+  
+  useEffect(()=>{
+    localStorage.setItem('darkMode', String(darkMode));
+  }, [darkMode]);
+
   return (
     <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"} h-screen overflow-hidden`}>
-      <Navbar />
+      <Navbar darkMode={darkMode} />
       <div className="flex">
         <div className="h-screen flex-shrink-0">
           <Sidebar 

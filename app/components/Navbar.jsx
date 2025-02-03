@@ -1,8 +1,8 @@
 'use client';
 
-export default function Navbar() {
+export default function Navbar({darkMode}) {
   return (
-    <nav className="flex items-center justify-between p-4 shadow-lg bg-gray-600 text-white">
+    <nav className={`${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"} p-4 shadow-md flex items-center justify-between`}>
       <div className="flex items-center gap-2">
         <img src="/logo.png" alt="Logo" className="h-8 w-8" />
         <h1 className="text-xl font-bold">Token Ghar</h1>
