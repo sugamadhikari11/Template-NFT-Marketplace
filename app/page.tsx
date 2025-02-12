@@ -47,7 +47,6 @@ export default function MarketplaceUI() {
         </div>
         <main className="flex-1 overflow-y-auto h-screen p-6">
           {currentPage === "home" && <HomePage />}
-          {currentPage === "manage-nfts" && <ManageNFTsPage />}
           {currentPage === "load-nft" && <LoadNFTPage />} 
           {currentPage === "mint-nft" && <MintNFTPage />} 
           {currentPage === "running-auction" && <RunningAuctionPage />}

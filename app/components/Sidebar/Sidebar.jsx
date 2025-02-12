@@ -1,23 +1,20 @@
-'use clinet'
-import { useState, useEffect } from "react";
+// components/Sidebar.js
 import { motion } from "framer-motion";
 import { Moon, Sun, ChevronLeft, ChevronRight, Home, PlayCircle, Clock } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import 'react-tooltip/dist/react-tooltip.css';
 import Dropdown from "../ManageNFT/Dropdown"; // Import the Dropdown component
+import useSidebar from "../../hooks/useSIdebar"; // Import the custom hook
+import NavigationItem from "./NavigationItem"; // Import the NavigationItem component
 
-export default function Sidebar({ darkMode, setDarkMode, sidebarOpen, setSidebarOpen, setCurrentPage }) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+export default function Sidebar({ darkMode, setDarkMode, setCurrentPage }) {
+  const { isMounted, sidebarOpen, setSidebarOpen } = useSidebar();
 
   return (
-    <motion.aside 
-      initial={{ width: isMounted ? "5rem" : sidebarOpen ? "15rem" : "5rem" }} 
-      animate={{ width: sidebarOpen ? "15rem" : "5rem" }} 
-      transition={isMounted ? { duration: 0.2, ease: "easeIn" } : { duration: 0 }} 
+    <motion.aside
+      initial={{ width: isMounted ? "5rem" : sidebarOpen ? "15rem" : "5rem" }}
+      animate={{ width: sidebarOpen ? "15rem" : "5rem" }}
+      transition={isMounted ? { duration: 0.2, ease: "easeIn" } : { duration: 0 }}
       className={`relative h-screen p-4 shadow-lg transition-all duration-300 
         ${darkMode ? "bg-gradient-to-b from-gray-700 to-gray-800 text-white" : "bg-gradient-to-b from-gray-200 to-gray-300 text-black"}
       `}
@@ -38,38 +35,32 @@ export default function Sidebar({ darkMode, setDarkMode, sidebarOpen, setSidebar
 
       {/* Navigation Links */}
       <ul className="mt-10 space-y-4">
-        {[
-          { id: "home", icon: <Home />, label: "Home" },
-          // Replace the Manage My NFTs item with the Dropdown
-          { id: "running-auction", icon: <PlayCircle />, label: "Running Auction" },
-          { id: "pending-auction", icon: <Clock />, label: "Pending Auction" }
-        ].map((item, index) => (
-          <motion.li 
-            key={index}
-            onClick={() => setCurrentPage(item.id)}
-            whileHover={{ scale: 1.1 , backgroundColor: darkMode ? "#4B5563" : "#E5E7EB" }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center p-3 rounded-lg cursor-pointer transition-all"
-            {...(!sidebarOpen && { "data-tooltip-id": "sidebar-tooltip", "data-tooltip-content": item.label })}
-          >
-            {item.icon}
-            {sidebarOpen && (
-              <motion.span 
-                initial={{ opacity: isMounted ? 0 : 1, x: isMounted ? -10 : 0 }} 
-                animate={{ opacity: sidebarOpen ? 1 : 0, x: sidebarOpen ? 0 : -10 }} 
-                transition={{ duration: 0.3 }} 
-                className="ml-3 text-lg"
-              >
-                {item.label}
-              </motion.span>
-            )}
-          </motion.li>
-        ))}
-        <Dropdown setCurrentPage={setCurrentPage} /> {/* Add the Dropdown here */}
+        <NavigationItem
+          icon={<Home />}
+          label="Home"
+          onClick={() => setCurrentPage("home")}
+          isOpen={sidebarOpen}
+          darkMode={darkMode}
+        />
+        <Dropdown setCurrentPage={setCurrentPage} />
+        <NavigationItem
+          icon={<PlayCircle />}
+          label="Running Auction"
+          onClick={() => setCurrentPage("running -auction")}
+          isOpen={sidebarOpen}
+          darkMode={darkMode}
+        />
+        <NavigationItem
+          icon={<Clock />}
+          label="Pending Auction"
+          onClick={() => setCurrentPage("pending-auction")}
+          isOpen={sidebarOpen}
+          darkMode={darkMode}
+        />
       </ul>
 
       {/* Dark Mode Toggle */}
-      <motion.button 
+      <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setDarkMode(!darkMode)}
@@ -77,10 +68,10 @@ export default function Sidebar({ darkMode, setDarkMode, sidebarOpen, setSidebar
       >
         {darkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
         {sidebarOpen && (
-          <motion.span 
-            initial={{ opacity: isMounted ? 0 : 1, x: isMounted ? -10 : 0 }} 
-            animate={{ opacity: 1, x: 0 }} 
-            transition={isMounted ? { duration: 0.3 } : { duration: 0 }} 
+          <motion.span
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
             className="ml-3 text-lg"
           >
             {darkMode ? "Light Mode" : "Dark Mode"}

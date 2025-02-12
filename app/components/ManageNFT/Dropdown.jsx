@@ -1,17 +1,18 @@
 // components/Dropdown.js
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Settings } from "lucide-react"; // Import the Settings icon
 
-const Dropdown = ({ setCurrentPage }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const Dropdown = ({ setCurrentPage, isOpen }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleToggle = () => {
-    setIsOpen(!isOpen);
+    setIsDropdownOpen(!isDropdownOpen);
   };
 
   const handleSelect = (page) => {
     setCurrentPage(page);
-    setIsOpen(false); // Close the dropdown after selection
+    setIsDropdownOpen(false); // Close the dropdown after selection
   };
 
   return (
@@ -22,9 +23,12 @@ const Dropdown = ({ setCurrentPage }) => {
         whileTap={{ scale: 0.95 }}
         className="flex items-center p-3 rounded-lg cursor-pointer transition-all"
       >
-        <span className="ml-3 text-lg">Manage My NFTs</span>
+        <Settings />
+        {isOpen && (
+          <span className="ml-3 text-lg">Manage My NFTs</span>
+        )}
       </motion.li>
-      {isOpen && (
+      {isDropdownOpen && (
         <div className="absolute left-0 mt-2 w-full bg-white shadow-lg rounded-md">
           <motion.button
             onClick={() => handleSelect("load-nft")}
