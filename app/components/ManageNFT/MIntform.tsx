@@ -16,7 +16,7 @@ export default function Home() {
 
     try {
       setUploading(true);
-      const keyRequest = await fetch("../api/key");
+      const keyRequest = await fetch("../api/files");
       const keyData = await keyRequest.json();
       const upload = await pinata.upload.file(file).key(keyData.JWT);
       const ipfsUrl = await pinata.gateways.convert(upload.IpfsHash)

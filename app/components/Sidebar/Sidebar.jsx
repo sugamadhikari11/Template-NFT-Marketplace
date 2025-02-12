@@ -1,9 +1,10 @@
-'use client';
+'use clinet'
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Moon, Sun, ChevronLeft, ChevronRight, Home, Settings, PlayCircle, Clock } from "lucide-react";
+import { Moon, Sun, ChevronLeft, ChevronRight, Home, PlayCircle, Clock } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import 'react-tooltip/dist/react-tooltip.css';
+import Dropdown from "../ManageNFT/Dropdown"; // Import the Dropdown component
 
 export default function Sidebar({ darkMode, setDarkMode, sidebarOpen, setSidebarOpen, setCurrentPage }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -39,14 +40,14 @@ export default function Sidebar({ darkMode, setDarkMode, sidebarOpen, setSidebar
       <ul className="mt-10 space-y-4">
         {[
           { id: "home", icon: <Home />, label: "Home" },
-          { id: "manage-nfts", icon: <Settings />, label: "Manage My NFTs" },
+          // Replace the Manage My NFTs item with the Dropdown
           { id: "running-auction", icon: <PlayCircle />, label: "Running Auction" },
           { id: "pending-auction", icon: <Clock />, label: "Pending Auction" }
         ].map((item, index) => (
           <motion.li 
             key={index}
             onClick={() => setCurrentPage(item.id)}
-            whileHover={{ scale: 1.1, backgroundColor: darkMode ? "#4B5563" : "#E5E7EB" }}
+            whileHover={{ scale: 1.1 , backgroundColor: darkMode ? "#4B5563" : "#E5E7EB" }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center p-3 rounded-lg cursor-pointer transition-all"
             {...(!sidebarOpen && { "data-tooltip-id": "sidebar-tooltip", "data-tooltip-content": item.label })}
@@ -64,6 +65,7 @@ export default function Sidebar({ darkMode, setDarkMode, sidebarOpen, setSidebar
             )}
           </motion.li>
         ))}
+        <Dropdown setCurrentPage={setCurrentPage} /> {/* Add the Dropdown here */}
       </ul>
 
       {/* Dark Mode Toggle */}

@@ -1,11 +1,13 @@
 'use client';
 import { useState, useEffect } from "react";
-import Sidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar";
-import HomePage from "./components/HomePage";
-import ManageNFTsPage from "./components/ManageNFTsPage";
-import RunningAuctionPage from "./components/RunningAuctionPage";
-import PendingAuctionPage from "./components/PendingAuctionPage";
+import Sidebar from "./components/Sidebar/Sidebar";
+import Navbar from "./components/Navbar/Navbar";
+import HomePage from "./pages/HomePage";
+import LoadNFTPage from './components/ManageNFT/LoadNFTPage'
+import MintNFTPage from './components/ManageNFT/MintNFTPage'
+import ManageNFTsPage from "./pages/ManageNFTsPage";
+import RunningAuctionPage from "./pages/RunningAuctionPage";
+import PendingAuctionPage from "./pages/PendingAuctionPage";
 
 export default function MarketplaceUI() {
   const [darkMode, setDarkMode] = useState(()=>{
@@ -46,6 +48,8 @@ export default function MarketplaceUI() {
         <main className="flex-1 overflow-y-auto h-screen p-6">
           {currentPage === "home" && <HomePage />}
           {currentPage === "manage-nfts" && <ManageNFTsPage />}
+          {currentPage === "load-nft" && <LoadNFTPage />} 
+          {currentPage === "mint-nft" && <MintNFTPage />} 
           {currentPage === "running-auction" && <RunningAuctionPage />}
           {currentPage === "pending-auction" && <PendingAuctionPage />}
         </main>

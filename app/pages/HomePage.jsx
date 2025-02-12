@@ -9,7 +9,7 @@ export default function HomePage() {
 
   const upcomingAuctions = [
     // Example auction items
-    { id: 1, title: "Auction 1", image: "image1.jpg" },
+    { id: 1, title: "Auction 1", image: "logo.png" },
     { id: 2, title: "Auction 2", image: "image2.jpg" },
     { id: 3, title: "Auction 3", image: "image3.jpg" },
     { id: 4, title: "Auction 4", image: "image4.jpg" },
