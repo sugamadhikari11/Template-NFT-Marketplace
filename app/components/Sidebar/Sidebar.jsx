@@ -42,7 +42,7 @@ export default function Sidebar({ darkMode, setDarkMode, setCurrentPage}) {
           isOpen={sidebarOpen}
           darkMode={darkMode}
         />
-        <Dropdown setCurrentPage={setCurrentPage} isOpen={sidebarOpen}/>
+        <Dropdown setCurrentPage={setCurrentPage} isOpen={sidebarOpen} darkMode={darkMode}/>
         <NavigationItem
           icon={<PlayCircle />}
           label="Running Auction"

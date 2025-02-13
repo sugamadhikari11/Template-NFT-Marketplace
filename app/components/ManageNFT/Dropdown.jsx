@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Settings } from "lucide-react"; // Import the Settings icon
 
-const Dropdown = ({ setCurrentPage, isOpen }) => {
+const Dropdown = ({ setCurrentPage, isOpen, darkMode }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleToggle = () => {
@@ -19,7 +19,7 @@ const Dropdown = ({ setCurrentPage, isOpen }) => {
     <div className="relative">
       <motion.li
         onClick={handleToggle}
-        whileHover={{ scale: 1.1, backgroundColor: "#4B5563" }}
+        whileHover={{ scale: 1.1,  backgroundColor: darkMode ? "#4B5563" : "#fff"}}
         whileTap={{ scale: 0.95 }}
         className="flex items-center p-3 rounded-lg cursor-pointer transition-all"
       >
