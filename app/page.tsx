@@ -6,7 +6,6 @@ import Navbar from "./components/Navbar/Navbar";
 import HomePage from "./pages/HomePage";
 import LoadNFTPage from "./components/ManageNFT/LoadNFTPage";
 import MintNFTPage from "./components/ManageNFT/MintNFTPage";
-import ManageNFTsPage from "./pages/ManageNFTsPage";
 import RunningAuctionPage from "./pages/RunningAuctionPage";
 import PendingAuctionPage from "./pages/PendingAuctionPage";
 import useSidebar from "../app/hooks/useSIdebar";
