@@ -7,7 +7,7 @@ import Dropdown from "../ManageNFT/Dropdown"; // Import the Dropdown component
 import useSidebar from "../../hooks/useSIdebar"; // Import the custom hook
 import NavigationItem from "./NavigationItem"; // Import the NavigationItem component
 
-export default function Sidebar({ darkMode, setDarkMode, setCurrentPage }) {
+export default function Sidebar({ darkMode, setDarkMode, setCurrentPage}) {
   const { isMounted, sidebarOpen, setSidebarOpen } = useSidebar();
 
   return (
@@ -42,7 +42,7 @@ export default function Sidebar({ darkMode, setDarkMode, setCurrentPage }) {
           isOpen={sidebarOpen}
           darkMode={darkMode}
         />
-        <Dropdown setCurrentPage={setCurrentPage} />
+        <Dropdown setCurrentPage={setCurrentPage} isOpen={sidebarOpen}/>
         <NavigationItem
           icon={<PlayCircle />}
           label="Running Auction"

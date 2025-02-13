@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 
 const useSidebar = () => {
   const [isMounted, setIsMounted] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    return localStorage.getItem('sidebarOpen') === "true"; // Convert to boolean
-  });
+  const [sidebarOpen, setSidebarOpen] = useState(() => localStorage.getItem('sidebarOpen') === "true");
+
+  
 
   useEffect(() => {
     setIsMounted(true);

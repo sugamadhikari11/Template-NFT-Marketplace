@@ -23,8 +23,7 @@ const Dropdown = ({ setCurrentPage, isOpen }) => {
         whileTap={{ scale: 0.95 }}
         className="flex items-center p-3 rounded-lg cursor-pointer transition-all"
       >
-        <Settings />
-        {isOpen && (
+        <Settings />{isOpen && (
           <span className="ml-3 text-lg">Manage My NFTs</span>
         )}
       </motion.li>

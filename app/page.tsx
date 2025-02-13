@@ -1,36 +1,40 @@
 'use client';
+
 import { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Navbar from "./components/Navbar/Navbar";
 import HomePage from "./pages/HomePage";
-import LoadNFTPage from './components/ManageNFT/LoadNFTPage'
-import MintNFTPage from './components/ManageNFT/MintNFTPage'
+import LoadNFTPage from "./components/ManageNFT/LoadNFTPage";
+import MintNFTPage from "./components/ManageNFT/MintNFTPage";
 import ManageNFTsPage from "./pages/ManageNFTsPage";
 import RunningAuctionPage from "./pages/RunningAuctionPage";
 import PendingAuctionPage from "./pages/PendingAuctionPage";
+import useSidebar from "../app/hooks/useSIdebar";
+
+interface SidebarProps {
+  sidebarOpen: any;
+  setSidebarOpen: (open: any) => void;
+}
+
 
 export default function MarketplaceUI() {
-  const [darkMode, setDarkMode] = useState(()=>{
-    return localStorage.getItem("darkMode")=="true";
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("darkMode") === "true";
   });
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    return localStorage.getItem('sidebarOpen') === "true";  // Convert to boolean
-  });  
+  const { isMounted} = useSidebar();
   const [currentPage, setCurrentPage] = useState(() => {
-    return localStorage.getItem('currentPage') || "home";
+    return localStorage.getItem("currentPage") || "home";
   });
 
   useEffect(() => {
-    localStorage.setItem('currentPage', currentPage);
+    localStorage.setItem("currentPage", currentPage);
   }, [currentPage]);
 
   useEffect(() => {
-    localStorage.setItem('sidebarOpen', String(sidebarOpen)); // Convert boolean to string
-  }, [sidebarOpen]);
-  
-  useEffect(()=>{
-    localStorage.setItem('darkMode', String(darkMode));
+    localStorage.setItem("darkMode", String(darkMode));
   }, [darkMode]);
+
+  if (!isMounted) return null;
 
   return (
     <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"} h-screen overflow-hidden`}>
@@ -38,10 +42,9 @@ export default function MarketplaceUI() {
       <div className="flex">
         <div className="h-screen flex-shrink-0">
           <Sidebar 
+          
             darkMode={darkMode} 
             setDarkMode={setDarkMode} 
-            sidebarOpen={sidebarOpen} 
-            setSidebarOpen={setSidebarOpen} 
             setCurrentPage={setCurrentPage}
           />
         </div>
