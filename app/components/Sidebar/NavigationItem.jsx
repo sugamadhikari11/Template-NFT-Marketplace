@@ -9,6 +9,7 @@ const NavigationItem = ({ icon, label, onClick, isOpen, darkMode }) => {
       whileTap={{ scale: 0.95 }}
       className="flex items-center p-3 rounded-lg cursor-pointer transition-all"
     >
+      
       {icon}
       {isOpen && (
         <motion.span

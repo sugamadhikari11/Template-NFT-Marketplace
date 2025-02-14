@@ -1,48 +1,71 @@
-// components/Dropdown.js
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Settings } from "lucide-react"; // Import the Settings icon
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Settings } from "lucide-react";
 
 const Dropdown = ({ setCurrentPage, isOpen, darkMode }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const handleToggle = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+    setIsDropdownOpen((prev) => !prev);
   };
 
   const handleSelect = (page) => {
     setCurrentPage(page);
-    setIsDropdownOpen(false); // Close the dropdown after selection
+    setIsDropdownOpen(false);
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="relative">
+    <div ref={dropdownRef} className="relative w-full md:w-auto">
+      {/* Dropdown Trigger */}
       <motion.li
         onClick={handleToggle}
-        whileHover={{ scale: 1.1,  backgroundColor: darkMode ? "#4B5563" : "#fff"}}
+        whileHover={{ scale: 1.1, backgroundColor: darkMode ? "#4B5563" : "#fff" }}
         whileTap={{ scale: 0.95 }}
         className="flex items-center p-3 rounded-lg cursor-pointer transition-all"
       >
-        <Settings />{isOpen && (
-          <span className="ml-3 text-lg">Manage My NFTs</span>
-        )}
+        <Settings />
+        {isOpen && <span className="ml-3 text-lg">Manage My NFTs</span>}
       </motion.li>
-      {isDropdownOpen && (
-        <div className="absolute left-0 mt-2 w-full bg-white shadow-lg rounded-md">
-          <motion.button
-            onClick={() => handleSelect("load-nft")}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+
+      {/* Dropdown Content */}
+      <AnimatePresence>
+        {isDropdownOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`absolute left-0 mt-2 w-full md:w-48 shadow-lg rounded-lg overflow-hidden
+              ${darkMode ? "bg-gradient-to-b from-gray-700 to-gray-800 text-white" : "bg-gradient-to-b from-gray-200 to-gray-300 text-black"}
+            `}
           >
-            Load NFT
-          </motion.button>
-          <motion.button
-            onClick={() => handleSelect("mint-nft")}
-            className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-          >
-            Mint NFT
-          </motion.button>
-        </div>
-      )}
+            <button
+              onClick={() => handleSelect("load-nft")}
+              className="block w-full text-left px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              Load NFT
+            </button>
+            <button
+              onClick={() => handleSelect("mint-nft")}
+              className="block w-full text-left px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              Mint NFT
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

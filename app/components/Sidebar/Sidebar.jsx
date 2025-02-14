@@ -46,7 +46,7 @@ export default function Sidebar({ darkMode, setDarkMode, setCurrentPage}) {
         <NavigationItem
           icon={<PlayCircle />}
           label="Running Auction"
-          onClick={() => setCurrentPage("running -auction")}
+          onClick={() => setCurrentPage("running-auction")}
           isOpen={sidebarOpen}
           darkMode={darkMode}
         />
