@@ -34,9 +34,9 @@ export default function Home() {
   };
 
   return (
-    <main className="w-full min-h-screen flex flex-col pt-20 items-center bg-gray-100 p-6">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center border border-gray-300">
-        <h1 className="text-xl font-semibold mb-4">Upload File to Pinata</h1>
+    <main className="w-full min-h-screen flex flex-col pt-20 items-center p-6">
+      <div className="p-6 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center border border-gray-300">
+        <h1 className="text-xl font-semibold mb-4"> Mint & Upload File to Pinata</h1>
         <input 
           type="file" 
           onChange={handleChange} 

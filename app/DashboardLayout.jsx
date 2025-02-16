@@ -7,6 +7,8 @@ import LoadNFTPage from "./components/ManageNFT/LoadNFTPage";
 import MintNFTPage from "./components/ManageNFT/MintNFTPage";
 import RunningAuctionPage from "./pages/RunningAuctionPage";
 import PendingAuctionPage from "./pages/PendingAuctionPage";
+import "./globals.css";
+
 
 const DashboardLayout = ({ darkMode, setDarkMode, currentPage, setCurrentPage }) => {
   return (

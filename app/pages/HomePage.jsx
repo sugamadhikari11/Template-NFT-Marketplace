@@ -5,17 +5,17 @@ import { useState } from "react";
 
 export default function HomePage() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const radius = 500; // Adjust radius as needed
+  const radius = 400; // Adjust radius as needed
 
   const upcomingAuctions = [
-    { id: 1, title: "Auction 1", image: "logo.png" },
-    { id: 2, title: "Auction 2", image: "image2.jpg" },
-    { id: 3, title: "Auction 3", image: "image3.jpg" },
-    { id: 4, title: "Auction 4", image: "image4.jpg" },
-    { id: 5, title: "Auction 5", image: "image5.jpg" },
-    { id: 6, title: "Auction 6", image: "image6.jpg" },
-    { id: 7, title: "Auction 7", image: "image7.jpg" },
-    { id: 8, title: "Auction 8", image: "image8.jpg" },
+    { id: 1, title: "Auction 1", image: "logo.png", link: "/auction/1" },
+    { id: 2, title: "Auction 2", image: "image2.jpg", link: "/auction/2" },
+    { id: 3, title: "Auction 3", image: "image3.jpg", link: "/auction/3" },
+    { id: 4, title: "Auction 4", image: "image4.jpg", link: "/auction/4" },
+    { id: 5, title: "Auction 5", image: "image5.jpg", link: "/auction/5" },
+    { id: 6, title: "Auction 6", image: "image6.jpg", link: "/auction/6" },
+    { id: 7, title: "Auction 7", image: "image7.jpg", link: "/auction/7" },
+    { id: 8, title: "Auction 8", image: "image8.jpg", link: "/auction/8" },
   ];
 
   const handleNext = () => {
@@ -35,7 +35,7 @@ export default function HomePage() {
       const angle =
         ((index - activeIndex + upcomingAuctions.length) %
           upcomingAuctions.length) *
-        (360 / upcomingAuctions.length);
+        (360 / upcomingAuctions.length + 5);
       const x = radius * Math.cos((angle * Math.PI) / 180);
       const y = radius * Math.sin((angle * Math.PI) / 180);
 
@@ -60,7 +60,7 @@ export default function HomePage() {
       const angle =
         ((index - activeIndex + upcomingAuctions.length) %
           upcomingAuctions.length) *
-        (360 / upcomingAuctions.length);
+        (360 / upcomingAuctions.length + 5);
       const x = radius * Math.cos((angle * Math.PI) / 180);
       const y = radius * Math.sin((angle * Math.PI) / 180);
 
@@ -79,17 +79,18 @@ export default function HomePage() {
     <div className="space-y-8 mb-10">
       <section className="relative">
         <h2 className="text-2xl font-bold mb-4 text-center">Upcoming Auctions</h2>
-        <div className="relative w-full h-[400px] flex items-center justify-center">
+        <div className="relative w-full h-[600px] p-10 flex items-center justify-center">
           {upcomingAuctions.map((auction, index) => (
             <motion.div
               key={auction.id}
-              className="absolute w-64 h-80 rounded-lg shadow-xl overflow-hidden cursor-pointer"
+              className="absolute w-64 h-80 rounded-lg shadow-xl overflow-hidden cursor-pointer flex flex-col items-center"
               variants={itemVariants}
               custom={index}
               initial="enter"
               animate={index === activeIndex ? "center" : "exit"}
               onClick={() => handleImageClick(index)}
             >
+              <a href={auction.link} className="bg-blue-500 text-white py-2 px-4 rounded-md mb-2 hover:bg-blue-600">Go to Auction</a>
               <img
                 src={auction.image}
                 alt={auction.title}

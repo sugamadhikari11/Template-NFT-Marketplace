@@ -53,13 +53,13 @@ const Dropdown = ({ setCurrentPage, isOpen, darkMode }) => {
           >
             <button
               onClick={() => handleSelect("load-nft")}
-              className="block w-full text-left px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="block w-full text-left px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-400"
             >
               Load NFT
             </button>
             <button
               onClick={() => handleSelect("mint-nft")}
-              className="block w-full text-left px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="block w-full text-left px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-400"
             >
               Mint NFT
             </button>
