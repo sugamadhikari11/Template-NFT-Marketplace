@@ -1,7 +1,6 @@
-"use client";
-
 import { useState } from "react";
 import { ethers } from "ethers";
+import AuctionAbi from "../../../app/contracts/AuctionAbi.json";
 
 // Replace with your actual contract addresses & ABIs
 const NFT_CONTRACT_ADDRESS = "0xYourNFTContractAddress";
@@ -29,31 +28,19 @@ const NFT_ABI = [
   }
 ];
 
-const AUCTION_ABI = [
-  {
-    "constant": false,
-    "inputs": [
-      { "name": "tokenId", "type": "uint256" },
-      { "name": "startPrice", "type": "uint256" },
-      { "name": "duration", "type": "uint256" }
-    ],
-    "name": "createAuction",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
-];
+const AUCTION_ABI = AuctionAbi;
 
-export default function LoadNFT() {
-  const [tokenId, setTokenId] = useState("");
+export default function AddNFTToAuction() {
+  const [nftAddress, setNftAddress] = useState(""); // NFT contract address
+  const [tokenId, setTokenId] = useState(""); // Token ID
   const [startPrice, setStartPrice] = useState(""); // Auction starting price
   const [duration, setDuration] = useState(""); // Auction duration in seconds
   const [loading, setLoading] = useState(false);
   const [nftData, setNftData] = useState(null);
 
   const loadNFT = async () => {
-    if (!tokenId) {
-      alert("Please enter Token ID");
+    if (!nftAddress || !tokenId) {
+      alert("Please enter NFT Address and Token ID");
       return;
     }
 
@@ -67,7 +54,7 @@ export default function LoadNFT() {
       }
 
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, provider);
+      const contract = new ethers.Contract(nftAddress, NFT_ABI, provider);
 
       // Fetch NFT metadata URI
       const tokenURI = await contract.tokenURI(tokenId);
@@ -84,7 +71,7 @@ export default function LoadNFT() {
   };
 
   const addToAuction = async () => {
-    if (!tokenId || !startPrice || !duration) {
+    if (!nftAddress || !tokenId || !startPrice || !duration) {
       alert("Enter all auction details.");
       return;
     }
@@ -102,7 +89,7 @@ export default function LoadNFT() {
       const signer = await provider.getSigner();
 
       // Step 1: Approve Auction Contract to transfer NFT
-      const nftContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, signer);
+      const nftContract = new ethers.Contract(nftAddress, NFT_ABI, signer);
       const approveTx = await nftContract.approve(AUCTION_CONTRACT_ADDRESS, tokenId);
       await approveTx.wait();
 
@@ -127,7 +114,18 @@ export default function LoadNFT() {
   return (
     <main className="w-full min-h-screen flex flex-col pt-20 items-center p-6">
       <div className="p-6 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center border border-gray-300">
-        <h1 className="text-xl font-semibold mb-4">Load Your NFT</h1>
+        <h1 className="text-xl font-semibold mb-4">Add Your NFT to Auction</h1>
+        
+        {/* NFT Address Input */}
+        <input 
+          type="text" 
+          placeholder="NFT Address" 
+          value={nftAddress} 
+          onChange={(e) => setNftAddress(e.target.value)} 
+          className="w-full mb-2 p-2 border border-gray-300 rounded-md"
+        />
+        
+        {/* Token ID Input */}
         <input 
           type="text" 
           placeholder="Token ID" 
@@ -135,6 +133,8 @@ export default function LoadNFT() {
           onChange={(e) => setTokenId(e.target.value)} 
           className="w-full mb-2 p-2 border border-gray-300 rounded-md"
         />
+
+        {/* Load NFT Button */}
         <div className="w-full flex justify-center">
           <button 
             type="button" 
