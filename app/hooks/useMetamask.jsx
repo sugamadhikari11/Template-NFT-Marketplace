@@ -1,117 +1,63 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 
-// Network IDs for different networks (Sepolia and Hardhat)
-const SEPOLIA_NETWORK_ID = "0xaa36a7"; // Sepolia network ID (EIP-155)
-const HARDHAT_NETWORK_ID = "31337"; // Hardhat network ID
+const HARDHAT_NETWORK_ID = "31337";
 
 export function useMetamask() {
-  const [accounts, setAccounts] = useState([]);
   const [userAddress, setUserAddress] = useState(null);
   const [provider, setProvider] = useState(null);
   const [networkError, setNetworkError] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState(null);
-  const [currentNetwork, setCurrentNetwork] = useState(null);
 
-  // Check if MetaMask is already connected
   useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        const { ethereum } = window;
+    const { ethereum } = window;
+    if (!ethereum) return;
 
-        if (ethereum) {
-          // Listen for network and account changes
-          window.ethereum.on("chainChanged", () => {
-            window.location.reload();
-          });
-          window.ethereum.on("accountsChanged", () => {
-            window.location.reload();
-          });
-
-          const accounts = await ethereum.request({ method: "eth_accounts" });
-          if (accounts.length > 0) {
-            setAccounts(accounts);
-            setUserAddress(accounts[0]);
-
-            const newProvider = new ethers.providers.Web3Provider(ethereum);
-            setProvider(newProvider);
-
-            const currentChainId = await ethereum.request({ method: "eth_chainId" });
-            setCurrentNetwork(currentChainId);
-
-            // Check if the connected network is correct (Sepolia or Hardhat)
-            if (![SEPOLIA_NETWORK_ID, HARDHAT_NETWORK_ID].includes(currentChainId)) {
-              setNetworkError(true); // Network mismatch
-              alert("Please switch to the correct network (Sepolia or Hardhat).");
-            } else {
-              setNetworkError(false); // Network is valid
-              setConnectionStatus("Successfully connected to MetaMask!"); // Success message
-            }
-          }
-        } else {
-          alert("Please install MetaMask.");
-        }
-      } catch (error) {
-        console.error("Error connecting wallet:", error);
-        alert("An error occurred while connecting to MetaMask.");
-      }
+    const handleAccountsChanged = (accounts) => {
+      setUserAddress(accounts.length ? accounts[0] : null);
     };
 
-    checkConnection();
+    const handleChainChanged = (chainId) => {
+      setNetworkError(chainId !== HARDHAT_NETWORK_ID);
+    };
 
-    // Cleanup listeners when component unmounts
+    ethereum.on("accountsChanged", handleAccountsChanged);
+    ethereum.on("chainChanged", handleChainChanged);
+
     return () => {
-      if (window.ethereum) {
-        window.ethereum.removeListener("chainChanged", () => window.location.reload());
-        window.ethereum.removeListener("accountsChanged", () => window.location.reload());
-      }
+      ethereum.removeListener("accountsChanged", handleAccountsChanged);
+      ethereum.removeListener("chainChanged", handleChainChanged);
     };
   }, []);
 
-  // Connect to MetaMask
   const connect = async () => {
     try {
       const { ethereum } = window;
-      if (ethereum) {
-        const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-        if (accounts.length > 0) {
-          setAccounts(accounts);
-          setUserAddress(accounts[0]);
+      if (!ethereum) throw new Error("MetaMask not found. Please install it.");
 
-          const newProvider = new ethers.providers.Web3Provider(ethereum);
-          setProvider(newProvider);
-
-          const currentChainId = await ethereum.request({ method: "eth_chainId" });
-          setCurrentNetwork(currentChainId);
-
-          if (![SEPOLIA_NETWORK_ID, HARDHAT_NETWORK_ID].includes(currentChainId)) {
-            setNetworkError(true);
-            alert("Please switch to the correct network (Sepolia or Hardhat).");
-          } else {
-            setNetworkError(false);
-            setConnectionStatus("Successfully connected to MetaMask!"); // Success message
-          }
-        }
-      } else {
-        alert("MetaMask not found. Please install MetaMask.");
+      if (ethereum.networkVersion !== HARDHAT_NETWORK_ID) {
+        setNetworkError(true);
+        throw new Error("Please switch to the Hardhat network.");
       }
+
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      if (!accounts.length) throw new Error("No accounts found.");
+
+      setUserAddress(accounts[0]);
+      setProvider(new ethers.BrowserProvider(ethereum));
+      setNetworkError(false);
+      setConnectionStatus("Connected to Hardhat.");
     } catch (error) {
-      console.error("Error connecting wallet:", error);
-      alert("An error occurred while connecting to MetaMask.");
+      alert(error.message);
     }
   };
 
-  // Disconnect from MetaMask
   const disconnect = () => {
-    setAccounts([]);
     setUserAddress(null);
     setProvider(null);
-    setConnectionStatus(null); // Clear connection status
-    setNetworkError(false); // Reset network error state
-    setCurrentNetwork(null); // Reset current network state
-    // Optionally clear persisted data from localStorage or cookies
-    localStorage.removeItem("connectedWallet");
+    setConnectionStatus(null);
+    setNetworkError(false);
   };
 
-  return { accounts, userAddress, provider, connect, disconnect, connectionStatus, networkError, currentNetwork };
+  return { userAddress, provider, connect, disconnect, connectionStatus, networkError };
 }
