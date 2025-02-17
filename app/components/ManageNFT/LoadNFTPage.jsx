@@ -1,35 +1,132 @@
 "use client";
 
 import { useState } from "react";
+import { ethers } from "ethers";
+
+// Replace with your actual contract addresses & ABIs
+const NFT_CONTRACT_ADDRESS = "0xYourNFTContractAddress";
+const AUCTION_CONTRACT_ADDRESS = "0xYourAuctionContractAddress";
+
+const NFT_ABI = [
+  {
+    "constant": false,
+    "inputs": [
+      { "name": "to", "type": "address" },
+      { "name": "tokenId", "type": "uint256" }
+    ],
+    "name": "approve",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "name": "_tokenId", "type": "uint256" }],
+    "name": "tokenURI",
+    "outputs": [{ "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+const AUCTION_ABI = [
+  {
+    "constant": false,
+    "inputs": [
+      { "name": "tokenId", "type": "uint256" },
+      { "name": "startPrice", "type": "uint256" },
+      { "name": "duration", "type": "uint256" }
+    ],
+    "name": "createAuction",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
 
 export default function LoadNFT() {
   const [tokenId, setTokenId] = useState("");
-  const [userAddress, setUserAddress] = useState("");
+  const [startPrice, setStartPrice] = useState(""); // Auction starting price
+  const [duration, setDuration] = useState(""); // Auction duration in seconds
   const [loading, setLoading] = useState(false);
   const [nftData, setNftData] = useState(null);
 
   const loadNFT = async () => {
-    if (!tokenId || !userAddress) {
-      alert("Please enter both Token ID and User Address");
+    if (!tokenId) {
+      alert("Please enter Token ID");
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/nft?tokenId=${tokenId}&userAddress=${userAddress}`);
-      const data = await response.json();
-      setNftData(data);
+
+      if (!window.ethereum) {
+        alert("Please install MetaMask");
+        setLoading(false);
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, provider);
+
+      // Fetch NFT metadata URI
+      const tokenURI = await contract.tokenURI(tokenId);
+      const metadataResponse = await fetch(tokenURI);
+      const metadata = await metadataResponse.json();
+
+      setNftData(metadata);
+    } catch (error) {
+      console.error("Error loading NFT:", error);
+      alert("Failed to load NFT.");
+    } finally {
       setLoading(false);
-    } catch (e) {
-      console.log(e);
+    }
+  };
+
+  const addToAuction = async () => {
+    if (!tokenId || !startPrice || !duration) {
+      alert("Enter all auction details.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      if (!window.ethereum) {
+        alert("Please install MetaMask");
+        setLoading(false);
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      // Step 1: Approve Auction Contract to transfer NFT
+      const nftContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, signer);
+      const approveTx = await nftContract.approve(AUCTION_CONTRACT_ADDRESS, tokenId);
+      await approveTx.wait();
+
+      // Step 2: Call Auction Contract to list NFT
+      const auctionContract = new ethers.Contract(AUCTION_CONTRACT_ADDRESS, AUCTION_ABI, signer);
+      const auctionTx = await auctionContract.createAuction(
+        tokenId,
+        ethers.parseEther(startPrice), // Convert ETH value
+        duration
+      );
+      await auctionTx.wait();
+
+      alert("NFT added to auction successfully!");
       setLoading(false);
-      alert("Error loading NFT");
+    } catch (error) {
+      console.error("Error adding NFT to auction:", error);
+      alert("Failed to add NFT to auction.");
+      setLoading(false);
     }
   };
 
   return (
-    <main className="w-full min-h-screen flex flex-col pt-20 items-center  p-6">
-      <div className=" p-6 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center border border-gray-300">
+    <main className="w-full min-h-screen flex flex-col pt-20 items-center p-6">
+      <div className="p-6 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center border border-gray-300">
         <h1 className="text-xl font-semibold mb-4">Load Your NFT</h1>
         <input 
           type="text" 
@@ -37,13 +134,6 @@ export default function LoadNFT() {
           value={tokenId} 
           onChange={(e) => setTokenId(e.target.value)} 
           className="w-full mb-2 p-2 border border-gray-300 rounded-md"
-        />
-        <input 
-          type="text" 
-          placeholder="User Address" 
-          value={userAddress} 
-          onChange={(e) => setUserAddress(e.target.value)} 
-          className="w-full mb-4 p-2 border border-gray-300 rounded-md"
         />
         <div className="w-full flex justify-center">
           <button 
@@ -55,10 +145,36 @@ export default function LoadNFT() {
             {loading ? "Loading..." : "Load NFT"}
           </button>
         </div>
+
         {nftData && (
           <div className="mt-4 w-full text-center">
-            <p className="text-sm text-gray-600">NFT Data:</p>
+            <p className="text-sm text-gray-600">NFT Metadata:</p>
             <pre className="mt-2 p-2 bg-gray-200 rounded-md text-sm">{JSON.stringify(nftData, null, 2)}</pre>
+            {nftData.image && <img src={nftData.image} alt="NFT" className="mt-2 w-full rounded-md" />}
+            
+            {/* Auction Form */}
+            <h2 className="mt-4 text-lg font-semibold">Add to Auction</h2>
+            <input 
+              type="text" 
+              placeholder="Start Price (ETH)" 
+              value={startPrice} 
+              onChange={(e) => setStartPrice(e.target.value)} 
+              className="w-full mb-2 p-2 border border-gray-300 rounded-md"
+            />
+            <input 
+              type="text" 
+              placeholder="Duration (seconds)" 
+              value={duration} 
+              onChange={(e) => setDuration(e.target.value)} 
+              className="w-full mb-2 p-2 border border-gray-300 rounded-md"
+            />
+            <button 
+              onClick={addToAuction} 
+              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition"
+              disabled={loading}
+            >
+              {loading ? "Processing..." : "Add to Auction"}
+            </button>
           </div>
         )}
       </div>

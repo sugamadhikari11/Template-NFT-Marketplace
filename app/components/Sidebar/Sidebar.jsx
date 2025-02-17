@@ -1,4 +1,5 @@
 // components/Sidebar.js
+'use client';
 import { motion } from "framer-motion";
 import { Moon, Sun, ChevronLeft, ChevronRight, Home, PlayCircle, Clock } from "lucide-react";
 import { Tooltip } from "react-tooltip";

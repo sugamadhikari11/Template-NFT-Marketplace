@@ -1,4 +1,5 @@
 // components/NavigationItem.js
+'use client';
 import { motion } from "framer-motion";
 
 const NavigationItem = ({ icon, label, onClick, isOpen, darkMode }) => {

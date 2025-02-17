@@ -1,4 +1,4 @@
-// hooks/useSidebar.js
+'use client'
 import { useState, useEffect } from "react";
 
 const useSidebar = () => {
