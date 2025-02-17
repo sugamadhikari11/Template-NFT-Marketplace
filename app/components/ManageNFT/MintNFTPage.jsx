@@ -5,27 +5,41 @@ import { pinata } from "@/utils/config";
 
 export default function Home() {
   const [file, setFile] = useState();
+  const [nftName, setNftName] = useState("");
+  const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
   const uploadFile = async () => {
-    if (!file) {
-      alert("No file selected");
+    if (!file || !nftName || !description) {
+      alert("Please fill all fields");
       return;
     }
 
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("name", nftName);
+    formData.append("description", description);
+
     try {
-      setUploading(true);
-      const keyRequest = await fetch("../api/files");
-      const keyData = await keyRequest.json();
-      const upload = await pinata.upload.file(file).key(keyData.JWT);
-      const ipfsUrl = await pinata.gateways.convert(upload.IpfsHash);
-      setUrl(ipfsUrl);
-      setUploading(false);
-    } catch (e) {
-      console.log(e);
-      setUploading(false);
+      const uploadRequest = await fetch("/api/files", {
+        method: "POST",
+        body: formData,
+      });
+
+      const response = await uploadRequest.json();
+
+      if (response.imageUrl && response.metadataUrl) {
+        setImageUrl(response.imageUrl);
+      } else {
+        alert(response.error || "Upload failed");
+      }
+    } catch (error) {
+      console.error(error);
       alert("Trouble uploading file");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -42,6 +56,8 @@ export default function Home() {
           onChange={handleChange} 
           className="w-full mb-4 p-2 border border-gray-300 rounded-md" 
         />
+        <input type="text" placeholder="NFT Name" value={nftName} onChange={(e) => setNftName(e.target.value)} className="border p-2" />
+        <textarea placeholder="NFT Description" value={description} onChange={(e) => setDescription(e.target.value)} className="border p-2"></textarea>
         <div className="w-full flex justify-center">
           <button 
             type="button" 
