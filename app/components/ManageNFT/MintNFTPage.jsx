@@ -30,8 +30,8 @@ export default function Home() {
 
       const response = await uploadRequest.json();
 
-      if (response.imageUrl && response.metadataUrl) {
-        setImageUrl(response.imageUrl);
+      if (response.imageUrl) {
+        setUrl(response.imageUrl);
       } else {
         alert(response.error || "Upload failed");
       }
@@ -51,18 +51,18 @@ export default function Home() {
     <main className="w-full min-h-screen flex flex-col pt-20 items-center p-6">
       <div className="p-6 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center border border-gray-300">
         <h1 className="text-xl font-semibold mb-4"> Mint & Upload File to Pinata</h1>
-        <input 
-          type="file" 
-          onChange={handleChange} 
-          className="w-full mb-4 p-2 border border-gray-300 rounded-md" 
+        <input
+          type="file"
+          onChange={handleChange}
+          className="w-full mb-4 p-2 border border-gray-300 rounded-md"
         />
         <input type="text" placeholder="NFT Name" value={nftName} onChange={(e) => setNftName(e.target.value)} className="border p-2" />
         <textarea placeholder="NFT Description" value={description} onChange={(e) => setDescription(e.target.value)} className="border p-2"></textarea>
         <div className="w-full flex justify-center">
-          <button 
-            type="button" 
-            disabled={uploading} 
-            onClick={uploadFile} 
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={uploadFile}
             className={`w-3/4 py-2 rounded-md text-white font-semibold transition ${uploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
           >
             {uploading ? "Uploading..." : "Upload"}
