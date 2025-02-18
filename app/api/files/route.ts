@@ -19,34 +19,57 @@ export async function POST(request: NextRequest) {
     }
 
     const imageCID = imageUpload.IpfsHash; // Store CID for deletion if needed
-    const imageUrl = await pinata.gateways.convert(imageCID);
+    // **Step 2: Create Metadata JSON with IPFS URI**
 
-    // **Step 2: Upload Metadata JSON with Image URL**
     const metadata = {
       name,
       description,
-      image: imageUrl
+      image: `ipfs://${imageCID}`, // Use IPFS URI for the image
+      attributes: [] // Add any additional attributes here if needed
     };
 
+
+    // **Step 3: Upload Metadata JSON**
+
     const jsonUpload = await pinata.upload.json(metadata);
+
     if (!jsonUpload || !jsonUpload.IpfsHash) {
+
       // **If metadata upload fails, delete the uploaded image**
+
       await pinata.unpin([imageCID]).catch(() => {
+
         console.log("Failed to remove image from IPFS");
+
       });
 
+
       return NextResponse.json({ error: "Metadata upload failed, image deleted" }, { status: 500 });
+
     }
 
-    const metadataUrl = await pinata.gateways.convert(jsonUpload.IpfsHash);
 
-    return NextResponse.json({ imageUrl, metadataUrl }, { status: 200 });
+    // **Step 4: Return both HTTP URLs and IPFS URIs**
+
+    const imageUrl = await pinata.gateways.convert(imageCID); // HTTP URL for display
+
+    const metadataUrl = await pinata.gateways.convert(jsonUpload.IpfsHash); // HTTP URL for metadata
+
+
+    return NextResponse.json({ 
+      imageUrl, 
+      metadataUrl, 
+      ipfsMetadataUri: `ipfs://${jsonUpload.IpfsHash}` // IPFS URI for minting
+    }, { status: 200 });
+
 
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
     );
+
   }
+
 }

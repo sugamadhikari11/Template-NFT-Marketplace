@@ -133,7 +133,8 @@ export default function AddNFTToAuction() {
           onChange={(e) => setTokenId(e.target.value)} 
           className="w-full mb-2 p-2 border border-gray-300 rounded-md"
         />
-
+          {/*Add other starting nft form items */}
+          
         {/* Load NFT Button */}
         <div className="w-full flex justify-center">
           <button 
@@ -145,6 +146,7 @@ export default function AddNFTToAuction() {
             {loading ? "Loading..." : "Load NFT"}
           </button>
         </div>
+
 
         {nftData && (
           <div className="mt-4 w-full text-center">
