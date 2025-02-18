@@ -1,10 +1,15 @@
+// hooks/useAuctionContract.ts
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
-import AuctionContractABI from "./AuctionContractABI.json";
+import AuctionContractABI from "./AuctionContractABI.json"; // Adjust the path as necessary
+import { useMetaMask } from "./useMetaMask"; // Ensure you have this hook
 
-const useAuctionContract = (contractAddress, provider) => {
-  const [contract, setContract] = useState(null);
-  const [signer, setSigner] = useState(null);
+const useAuctionContract = () => {
+  const { provider } = useMetaMask(); // Get provider from MetaMask
+  const contractAddress = process.env.NEXT_PUBLIC_AUCTION_CONTRACT_ADDRESS; // Read from .env
+
+  const [contract, setContract] = useState<ethers.Contract | null>(null);
+  const [signer, setSigner] = useState<ethers.Signer | null>(null);
 
   useEffect(() => {
     if (provider && contractAddress) {
@@ -19,33 +24,33 @@ const useAuctionContract = (contractAddress, provider) => {
     }
   }, [provider, contractAddress]);
 
-  const addNFT = useCallback(async (nftAddress, tokenId) => {
+  const addNFT = useCallback(async (nftAddress, tokenId, description, initialPrice) => {
     if (!contract) return;
-    const tx = await contract.addNFT(nftAddress, tokenId);
+    const tx = await contract.addNFT(nftAddress, tokenId, description, initialPrice);
     await tx.wait();
   }, [contract]);
 
-  const startAuction = useCallback(async (nftAddress, tokenId, minBid, duration) => {
+  const startAuction = useCallback(async (nftId, startingPrice, duration) => {
     if (!contract) return;
-    const tx = await contract.startAuction(nftAddress, tokenId, minBid, duration);
+    const tx = await contract.startAuction(nftId, startingPrice, duration);
     await tx.wait();
   }, [contract]);
 
-  const placeBid = useCallback(async (nftAddress, tokenId, bidAmount) => {
+  const placeBid = useCallback(async (nftId, bidAmount) => {
     if (!contract) return;
-    const tx = await contract.placeBid(nftAddress, tokenId, { value: bidAmount });
+    const tx = await contract.placeBid(nftId, { value: bidAmount });
     await tx.wait();
   }, [contract]);
 
-  const endAuction = useCallback(async (nftAddress, tokenId) => {
+  const endAuction = useCallback(async (nftId) => {
     if (!contract) return;
-    const tx = await contract.endAuction(nftAddress, tokenId);
+    const tx = await contract.endAuction(nftId);
     await tx.wait();
   }, [contract]);
 
-  const revokeAuction = useCallback(async (nftAddress, tokenId) => {
+  const revokeAuction = useCallback(async (nftId) => {
     if (!contract) return;
-    const tx = await contract.revokeAuction(nftAddress, tokenId);
+    const tx = await contract.revokeAuction(nftId);
     await tx.wait();
   }, [contract]);
 
