@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar/Navbar";
 import HomePage from "./pages/HomePage";
 import LoadNFTPage from "./components/ManageNFT/LoadNFTPage";
 import MintNFTPage from "./components/ManageNFT/MintNFTPage";
+import MyNFTPage from "./components/ManageNFT/MyNFTPage";
 import RunningAuctionPage from "./pages/RunningAuctionPage";
 import PendingAuctionPage from "./pages/PendingAuctionPage";
 import "./globals.css";
@@ -22,6 +23,7 @@ const DashboardLayout = ({ darkMode, setDarkMode, currentPage, setCurrentPage })
           {currentPage === "home" && <HomePage />}
           {currentPage === "load-nft" && <LoadNFTPage />} 
           {currentPage === "mint-nft" && <MintNFTPage />} 
+          {currentPage === "my-nft" && <MyNFTPage />} 
           {currentPage === "running-auction" && <RunningAuctionPage />}
           {currentPage === "pending-auction" && <PendingAuctionPage />}
         </main>

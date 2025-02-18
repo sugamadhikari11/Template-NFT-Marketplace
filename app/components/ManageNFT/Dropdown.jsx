@@ -64,6 +64,12 @@ const Dropdown = ({ setCurrentPage, isOpen, darkMode }) => {
             >
               Mint NFT
             </button>
+            <button
+              onClick={() => handleSelect("my-nft")}
+              className="block w-full text-left px-4 py-3 hover:bg-gray-200 dark:hover:bg-gray-400"
+            >
+              My NFT
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

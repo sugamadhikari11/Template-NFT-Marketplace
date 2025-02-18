@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { ethers } from "ethers";
-import AuctionAbi from "../../../app/contracts/AuctionAbi.json";
-
-// Replace with your actual contract addresses & ABIs
-const NFT_CONTRACT_ADDRESS = "0xYourNFTContractAddress";
-const AUCTION_CONTRACT_ADDRESS = "0xYourAuctionContractAddress";
+import AuctionAbi from "../../../app/contracts/AuctionAbi.json"; // Adjust the path as necessary
+import useAuctionContract from '../../hooks/useAuctionContract'; // Adjust the path as necessary
 
 const NFT_ABI = [
   {
@@ -28,15 +25,16 @@ const NFT_ABI = [
   }
 ];
 
-const AUCTION_ABI = AuctionAbi;
 
 export default function AddNFTToAuction() {
+  const { addNFT } = useAuctionContract();
   const [nftAddress, setNftAddress] = useState(""); // NFT contract address
   const [tokenId, setTokenId] = useState(""); // Token ID
-  const [startPrice, setStartPrice] = useState(""); // Auction starting price
-  const [duration, setDuration] = useState(""); // Auction duration in seconds
+  const [description, setDescription] = useState('');
+  const [initialPrice, setInitialPrice] = useState('');  
   const [loading, setLoading] = useState(false);
   const [nftData, setNftData] = useState(null);
+  const [message, setMessage] = useState("");
 
   const loadNFT = async () => {
     if (!nftAddress || !tokenId) {
@@ -46,21 +44,26 @@ export default function AddNFTToAuction() {
 
     try {
       setLoading(true);
-
-      if (!window.ethereum) {
-        alert("Please install MetaMask");
-        setLoading(false);
-        return;
-      }
-
       const provider = new ethers.BrowserProvider(window.ethereum);
       const contract = new ethers.Contract(nftAddress, NFT_ABI, provider);
-
-      // Fetch NFT metadata URI
       const tokenURI = await contract.tokenURI(tokenId);
-      const metadataResponse = await fetch(tokenURI);
+
+      // Replace ipfs:// with Pinata gateway
+      const pinataGateway = "https://gateway.pinata.cloud/ipfs/";
+      const metadataURI = tokenURI.replace("ipfs://", pinataGateway);
+  
+      console.log("Fetching metadata from:", metadataURI);
+      const metadataResponse = await fetch(metadataURI);
+  
+      if (!metadataResponse.ok) {
+          throw new Error(`HTTP error! status: ${metadataResponse.status}`);
+      }
       const metadata = await metadataResponse.json();
 
+      if (metadata.image && metadata.image.startsWith("ipfs://")) {
+        metadata.image = metadata.image.replace("ipfs://", pinataGateway);
+      }
+  
       setNftData(metadata);
     } catch (error) {
       console.error("Error loading NFT:", error);
@@ -70,45 +73,38 @@ export default function AddNFTToAuction() {
     }
   };
 
-  const addToAuction = async () => {
-    if (!nftAddress || !tokenId || !startPrice || !duration) {
-      alert("Enter all auction details.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      if (!window.ethereum) {
-        alert("Please install MetaMask");
-        setLoading(false);
+  const addToAuction = async (e) => {
+    e.preventDefault();
+    if (!nftAddress || !tokenId || !initialPrice || !description) {
+        alert("Enter all auction details.");
         return;
-      }
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-
-      // Step 1: Approve Auction Contract to transfer NFT
-      const nftContract = new ethers.Contract(nftAddress, NFT_ABI, signer);
-      const approveTx = await nftContract.approve(AUCTION_CONTRACT_ADDRESS, tokenId);
-      await approveTx.wait();
-
-      // Step 2: Call Auction Contract to list NFT
-      const auctionContract = new ethers.Contract(AUCTION_CONTRACT_ADDRESS, AUCTION_ABI, signer);
-      const auctionTx = await auctionContract.createAuction(
-        tokenId,
-        ethers.parseEther(startPrice), // Convert ETH value
-        duration
-      );
-      await auctionTx.wait();
-
-      alert("NFT added to auction successfully!");
-      setLoading(false);
-    } catch (error) {
-      console.error("Error adding NFT to auction:", error);
-      alert("Failed to add NFT to auction.");
-      setLoading(false);
     }
+
+    // Validate NFT address
+    if (!ethers.isAddress(nftAddress)) {
+        alert("Invalid NFT address.");
+        return;
+    }
+
+    
+    try {
+
+      await addNFT(nftAddress, tokenId, description, ethers.parseEther(initialPrice));
+
+      setMessage('NFT added to auction successfully!');
+
+    } catch (error) {
+
+      console.error('Error adding NFT:', error);
+
+      setMessage('Failed to add NFT to auction.');
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
   };
 
   return (
@@ -116,7 +112,6 @@ export default function AddNFTToAuction() {
       <div className="p-6 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center border border-gray-300">
         <h1 className="text-xl font-semibold mb-4">Add Your NFT to Auction</h1>
         
-        {/* NFT Address Input */}
         <input 
           type="text" 
           placeholder="NFT Address" 
@@ -125,7 +120,6 @@ export default function AddNFTToAuction() {
           className="w-full mb-2 p-2 border border-gray-300 rounded-md"
         />
         
-        {/* Token ID Input */}
         <input 
           type="text" 
           placeholder="Token ID" 
@@ -133,10 +127,8 @@ export default function AddNFTToAuction() {
           onChange={(e) => setTokenId(e.target.value)} 
           className="w-full mb-2 p-2 border border-gray-300 rounded-md"
         />
-          {/*Add other starting nft form items */}
-          
-        {/* Load NFT Button */}
-        <div className="w-full flex justify-center">
+        
+        <div className=" w-full flex justify-center">
           <button 
             type="button" 
             disabled={loading} 
@@ -147,27 +139,24 @@ export default function AddNFTToAuction() {
           </button>
         </div>
 
-
         {nftData && (
           <div className="mt-4 w-full text-center">
             <p className="text-sm text-gray-600">NFT Metadata:</p>
             <pre className="mt-2 p-2 bg-gray-200 rounded-md text-sm">{JSON.stringify(nftData, null, 2)}</pre>
             {nftData.image && <img src={nftData.image} alt="NFT" className="mt-2 w-full rounded-md" />}
-            
-            {/* Auction Form */}
             <h2 className="mt-4 text-lg font-semibold">Add to Auction</h2>
             <input 
               type="text" 
-              placeholder="Start Price (ETH)" 
-              value={startPrice} 
-              onChange={(e) => setStartPrice(e.target.value)} 
+              placeholder="Description" 
+              value={description} 
+              onChange={(e) => setDescription(e.target.value)} 
               className="w-full mb-2 p-2 border border-gray-300 rounded-md"
             />
             <input 
               type="text" 
-              placeholder="Duration (seconds)" 
-              value={duration} 
-              onChange={(e) => setDuration(e.target.value)} 
+              placeholder="Start Price (ETH)" 
+              value={initialPrice} 
+              onChange={(e) => setInitialPrice(e.target.value)} 
               className="w-full mb-2 p-2 border border-gray-300 rounded-md"
             />
             <button 
@@ -179,6 +168,8 @@ export default function AddNFTToAuction() {
             </button>
           </div>
         )}
+
+        {message && <p className="mt-4 text-center text-red-500">{message}</p>}
       </div>
     </main>
   );
