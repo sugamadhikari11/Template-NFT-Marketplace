@@ -40,6 +40,31 @@ const useStartEndAuction = (provider, userAddress) => {
       setLoading(false);
     }
   };
+  const revokeAuction = async (id) => {
+    if (!provider || !userAddress) {
+      console.error("Provider or user address is missing.");
+      return;
+    }
+    
+  
+    try {
+      setLoading(true);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(process.env.NEXT_PUBLIC_AUCTION_ADDRESS, auctionABI.abi, signer);
+  
+      const tx = await contract.revokeAuction(id);
+      await tx.wait();
+  
+      console.log("Auction revoked successfully!");
+      setLoading(false);
+    } catch (err) {
+      console.error("Error revoking auction:", err);
+      setError("Failed to revoke auction.");
+      setLoading(false);
+    }
+  };
+  
 
   // End Auction function
   const endAuction = async (nftTokenId) => {
@@ -72,7 +97,7 @@ const useStartEndAuction = (provider, userAddress) => {
     }
   };
 
-  return { startAuction, endAuction, loading, error };
+  return { startAuction, revokeAuction, endAuction, loading, error };
 };
 
 export default useStartEndAuction;

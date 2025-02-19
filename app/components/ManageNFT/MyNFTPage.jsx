@@ -59,7 +59,7 @@ const MyNFTs = () => {
   }, [nfts]);
 
   // Get start/end auction functions from the custom hook
-  const { startAuction, endAuction, loading: auctionLoading, error: auctionError } = useStartEndAuction(provider, userAddress);
+  const { startAuction, revokeAuction, endAuction, loading: auctionLoading, error: auctionError } = useStartEndAuction(provider, userAddress);
 
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
@@ -97,6 +97,18 @@ const MyNFTs = () => {
       alert("Failed to start auction. Check the console for errors.");
     }
   };
+
+  const handleRevokeAuction = async (id) => {
+    try {
+      await revokeAuction(id);
+      console.log("Auction revoked successfully!");
+      refetchNFTs(); // Refresh the list of NFTs after revocation
+    } catch (error) {
+      console.error("Error revoking auction:", error);
+      alert("Failed to revoke auction.");
+    } 
+  };
+  
 
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
@@ -143,13 +155,27 @@ const MyNFTs = () => {
 
                 {/* Show Start or End Auction Button */}
                 {nft.status === "Pending" && (
+                  <div className="flex gap-2">
+                  {/* Start Auction Button */}
                   <button
                     onClick={() => handleStartAuction(nft)}
-                    className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg"
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg"
                     disabled={auctionLoading}
                   >
                     {auctionLoading ? "Starting..." : "Start Auction"}
                   </button>
+              
+                  {/* Revoke Auction Button */}
+                  <button
+                    onClick={() => handleRevokeAuction(nft.id)}
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                    disabled={auctionLoading}
+                  >
+                    {auctionLoading ? "Revoking..." : "Revoke"}
+                  </button>
+                </div>
+                  
+
                 )}
 
                 {nft.status === "Active" && (
