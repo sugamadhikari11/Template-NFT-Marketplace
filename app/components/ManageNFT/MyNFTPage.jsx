@@ -108,6 +108,17 @@ const MyNFTs = () => {
       alert("Failed to revoke auction.");
     } 
   };
+  const handleEndAuction = async (id) => {
+    try {
+      await endAuction(id);
+      console.log("Auction ended successfully!");
+      refetchNFTs(); // Refresh the list of NFTs after ending the auction
+    } catch (error) {
+      console.error("Error ending auction:", error);
+      alert("Failed to end auction.");
+    }
+  };
+  
   
 
   return (
@@ -180,7 +191,7 @@ const MyNFTs = () => {
 
                 {nft.status === "Active" && (
                   <button
-                    onClick={() => endAuction(nft.tokenId)}
+                    onClick={() => handleEndAuction(nft.id)}
                     className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg"
                     disabled={auctionLoading}
                   >

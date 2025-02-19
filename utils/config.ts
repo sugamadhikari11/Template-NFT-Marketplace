@@ -9,3 +9,4 @@ export const pinata = new PinataSDK({
 
 // src/config.ts
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+export const Auction_ADDRESS = process.env.NEXT_PUBLIC_AUCTION_ADDRESS;

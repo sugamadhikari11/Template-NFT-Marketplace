@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useMetamask } from "../../hooks/web3/useMetamask"; // Import MetaMask hook
 import usePlaceBid from "../../hooks/usePlaceBid";
-import { CONTRACT_ADDRESS } from "../../../utils/config";
+import { Auction_ADDRESS } from "../../../utils/config";
 import { ethers } from "ethers";
 
 const BidModal = ({ auction, isOpen, onClose }) => {
   const [bidAmount, setBidAmount] = useState("");
   const { provider, connect, userAddress } = useMetamask();
-  const { placeBid, loading, error } = usePlaceBid(CONTRACT_ADDRESS);
+  const { placeBid, loading, error } = usePlaceBid(Auction_ADDRESS);
 
   if (!isOpen || !auction) return null;
 
@@ -21,7 +21,7 @@ const BidModal = ({ auction, isOpen, onClose }) => {
       if (!userAddress) {
         await connect();
       }
-      
+
       if (!signer) {
         alert("No signer found. Connect your wallet.");
         return;

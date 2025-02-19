@@ -67,7 +67,7 @@ const useStartEndAuction = (provider, userAddress) => {
   
 
   // End Auction function
-  const endAuction = async (nftTokenId) => {
+  const endAuction = async (id) => {
     if (!provider || !userAddress) return;
 
     try {
@@ -86,9 +86,9 @@ const useStartEndAuction = (provider, userAddress) => {
       );
 
       // Send the endAuction transaction to the contract
-      const tx = await contract.endAuction(nftTokenId);
+      const tx = await contract.endAuction(id);
       await tx.wait();
-      alert(`Auction for NFT ${nftTokenId} ended successfully`);
+      alert(`Auction for NFT ${id} ended successfully`);
     } catch (err) {
       console.error("Error ending auction:", err);
       setError("Failed to end auction");
