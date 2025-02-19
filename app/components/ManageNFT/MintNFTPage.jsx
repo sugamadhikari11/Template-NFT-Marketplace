@@ -92,13 +92,13 @@ export default function Home() {
           placeholder="NFT Name"
           value={nftName}
           onChange={(e) => setNftName(e.target.value)}
-          className="w-full mb-4 p-2 border border-gray-300 rounded-md"
+          className="w-full mb-4 bg-transparent p-2 border border-gray-300 rounded-md"
         />
         <textarea
           placeholder="NFT Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full mb-4 p-2 border border-gray-300 rounded-md"
+          className="w-full mb-4 p-2 bg-transparent border border-gray-300 rounded-md"
         />
 
         {/* Mint Button */}

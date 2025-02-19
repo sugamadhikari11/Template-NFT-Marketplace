@@ -1,7 +1,7 @@
 // components/Sidebar.js
 'use client';
 import { motion } from "framer-motion";
-import { Moon, Sun, ChevronLeft, ChevronRight, Home, PlayCircle, Clock } from "lucide-react";
+import { Moon, Sun, ChevronLeft, ChevronRight, Home, PlayCircle, Clock, CrossIcon, CrosshairIcon } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import 'react-tooltip/dist/react-tooltip.css';
 import Dropdown from "../ManageNFT/Dropdown"; // Import the Dropdown component
@@ -55,6 +55,13 @@ export default function Sidebar({ darkMode, setDarkMode, setCurrentPage}) {
           icon={<Clock />}
           label="Pending Auction"
           onClick={() => setCurrentPage("pending-auction")}
+          isOpen={sidebarOpen}
+          darkMode={darkMode}
+        />
+        <NavigationItem
+          icon={<CrosshairIcon />}
+          label="Ended Auction"
+          onClick={() => setCurrentPage("ended-auction")}
           isOpen={sidebarOpen}
           darkMode={darkMode}
         />

@@ -111,7 +111,7 @@ const MyNFTs = () => {
   
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-3xl mx-auto mt-10 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">My Auction NFTs</h2>
 
       {loading && <p>Loading NFTs...</p>}
@@ -121,7 +121,7 @@ const MyNFTs = () => {
         <select
           value={selectedCategory}
           onChange={handleCategoryChange}
-          className="border p-2 rounded-lg"
+          className="border bg-transparent p-2 rounded-lg"
         >
           <option value="Pending">Pending</option>
           <option value="Active">Active</option>

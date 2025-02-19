@@ -1,8 +1,9 @@
+"use client";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import useGetAllAuctionsByStatus from "../hooks/useGetAllAuctionByStatus";
 
-const PendingAuctions = () => {
+const EndedAuctions = () => {
   const [provider, setProvider] = useState(null);
 
   // Load provider
@@ -15,15 +16,15 @@ const PendingAuctions = () => {
     loadProvider();
   }, []);
 
-  // Fetch pending auctions
-  const { auctions, loading, error } = useGetAllAuctionsByStatus(provider, "Pending");
+  // Fetch ended auctions
+  const { auctions, loading, error } = useGetAllAuctionsByStatus(provider, "Ended");
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Pending Auctions</h2>
-      {loading && <p>Loading pending auctions...</p>}
+      <h2 className="text-2xl font-bold mb-4">Ended Auctions</h2>
+      {loading && <p>Loading ended auctions...</p>}
       {error && <p className="text-red-500">{error}</p>}
-      {!loading && auctions.length === 0 && <p>No pending auctions available.</p>}
+      {!loading && auctions.length === 0 && <p>No ended auctions available.</p>}
 
       <div className="grid grid-cols-2 gap-4">
         {auctions.map((auction) => (
@@ -39,7 +40,8 @@ const PendingAuctions = () => {
             )}
             <h3 className="text-lg font-semibold mt-2">{auction.description}</h3>
             <p className="text-xs text-gray-400">ID: {auction.id}</p>
-            <p className="text-sm font-bold">Starting Price: {auction.startingPrice} ETH</p>
+            <p className="text-sm font-bold">Final Price: {auction.finalPrice} ETH</p>
+            <p className="text-sm text-gray-500">Winner: {auction.winner || "No winner"}</p>
             <p className="text-sm text-gray-500">Status: {auction.status}</p>
           </div>
         ))}
@@ -48,4 +50,4 @@ const PendingAuctions = () => {
   );
 };
 
-export default PendingAuctions;
+export default EndedAuctions;

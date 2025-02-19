@@ -8,6 +8,7 @@ import MintNFTPage from "./components/ManageNFT/MintNFTPage";
 import MyNFTPage from "./components/ManageNFT/MyNFTPage";
 import RunningAuctionPage from "./pages/RunningAuctionPage";
 import PendingAuctionPage from "./pages/PendingAuctionPage";
+import EndedAuctionPage from "./pages/EndedAuctionPage";
 import "./globals.css";
 
 
@@ -26,6 +27,7 @@ const DashboardLayout = ({ darkMode, setDarkMode, currentPage, setCurrentPage })
           {currentPage === "my-nft" && <MyNFTPage />} 
           {currentPage === "running-auction" && <RunningAuctionPage />}
           {currentPage === "pending-auction" && <PendingAuctionPage />}
+          {currentPage === "ended-auction" && <EndedAuctionPage />}
         </main>
       </div>
     </div>

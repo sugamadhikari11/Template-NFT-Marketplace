@@ -74,14 +74,14 @@ const AddNFT = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-md mx-auto mt-10 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Add NFT to Auction</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-gray-700">NFT Address:</label>
           <input
             type="text"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 bg-transparent border border-gray-300 rounded"
             value={nftAddress}
             onChange={(e) => setNftAddress(e.target.value)}
             required
@@ -92,7 +92,7 @@ const AddNFT = () => {
           <label className="block text-gray-700">Token ID:</label>
           <input
             type="text"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border bg-transparent border-gray-300 rounded"
             value={tokenId}
             onChange={(e) => setTokenId(e.target.value)}
             required
@@ -103,7 +103,7 @@ const AddNFT = () => {
           <label className="block text-gray-700">Description:</label>
           <input
             type="text"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 bg-transparent border border-gray-300 rounded"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
@@ -114,7 +114,7 @@ const AddNFT = () => {
           <label className="block text-gray-700">Initial Price (ETH):</label>
           <input
             type="text"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 bg-transparent border border-gray-300 rounded"
             value={initialPrice}
             onChange={(e) => setInitialPrice(e.target.value)}
             required
@@ -123,7 +123,7 @@ const AddNFT = () => {
 
         <button
           type="button"
-          className="w-full bg-purple-500 text-white p-2 rounded hover:bg-purple-600"
+          className="w-full bg-orange-500 text-white p-2 rounded hover:bg-purple-600"
           disabled={loadingNFT}
           onClick={loadNFT}
         >

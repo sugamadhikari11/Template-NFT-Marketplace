@@ -27,7 +27,7 @@ const RunningAuctions = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-4xl mx-auto mt-10 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Running Auctions</h2>
       {loading && <p>Loading active auctions...</p>}
       {error && <p className="text-red-500">{error}</p>}
