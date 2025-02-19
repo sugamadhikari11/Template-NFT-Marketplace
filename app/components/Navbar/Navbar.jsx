@@ -12,36 +12,31 @@ export default function Navbar({ darkMode, setCurrentPage }) {
         <img src="/logo.png" alt="Logo" className="h-8 w-8" />
         <h1 className="text-xl font-bold">Token Ghar</h1>
       </div>
+      
       <div className="flex items-center gap-4">
         <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
 
-        {connectionStatus && <p className="text-green-500">{connectionStatus}</p>}
-
-        {networkError && (
-          <p className="text-red-500">
-            ⚠️ Wrong network! Please switch to Hardhat (Chain ID: 31337).
+        {userAddress && (
+          <p className="text-sm">
+            {userAddress.slice(0, 6)}...{userAddress.slice(-4)}
           </p>
         )}
 
+        {userAddress && networkError && (
+          <p className="text-sm text-red-400">Please switch to the Hardhat network.</p>
+        )}
+
         {userAddress ? (
-          <div className="flex items-center gap-3">
-            <p>Connected: {userAddress.slice(0, 6)}...{userAddress.slice(-4)}</p>
-            <button 
-              onClick={disconnect} 
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            >
-              Disconnect
-            </button>
-          </div>
+          <button onClick={disconnect} className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-all">
+            Disconnect
+          </button>
         ) : (
-          <button 
-            onClick={connect} 
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            {connectionStatus ? connectionStatus : "Connect MetaMask"}
+          <button onClick={connect} className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-all">
+            Connect MetaMask
           </button>
         )}
       </div>
+
     </nav>
   );
 }
