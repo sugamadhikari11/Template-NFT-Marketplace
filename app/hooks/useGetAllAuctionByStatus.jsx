@@ -58,6 +58,10 @@ const useGetAllAuctionsByStatus = (provider, status) => {
               image,
               startingPrice,
               status: status,
+              highestBid: auction.highestBid,
+              auctionEndTime: auction.endTime 
+              ? new Date(Number(auction.endTime) * 1000).toLocaleString() 
+              : "Unknown",
             };
           })
         );

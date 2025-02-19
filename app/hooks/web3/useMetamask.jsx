@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 
-const HARDHAT_NETWORK_ID = "31337";
+const HARDHAT_NETWORK_ID = "31337";  // Hardhat Network ID in Decimal
 
 export function useMetamask() {
   const [userAddress, setUserAddress] = useState(null);
@@ -18,7 +18,8 @@ export function useMetamask() {
     };
 
     const handleChainChanged = (chainId) => {
-      setNetworkError(chainId !== HARDHAT_NETWORK_ID);
+      const parsedChainId = parseInt(chainId, 16); // Convert from hex to decimal
+      setNetworkError(parsedChainId !== Number(HARDHAT_NETWORK_ID));
     };
 
     ethereum.on("accountsChanged", handleAccountsChanged);
@@ -35,16 +36,21 @@ export function useMetamask() {
       const { ethereum } = window;
       if (!ethereum) throw new Error("MetaMask not found. Please install it.");
 
-      if (ethereum.networkVersion !== HARDHAT_NETWORK_ID) {
+      const chainId = await ethereum.request({ method: "eth_chainId" });
+      const parsedChainId = parseInt(chainId, 16); // Ensure chainId is in decimal
+
+      if (parsedChainId !== Number(HARDHAT_NETWORK_ID)) {
         setNetworkError(true);
-        throw new Error("Please switch to the Hardhat network.");
+        throw new Error(`Wrong network detected: ${parsedChainId}. Please switch to Hardhat (31337).`);
       }
 
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
       if (!accounts.length) throw new Error("No accounts found.");
 
+      const newProvider = new ethers.BrowserProvider(ethereum);
+      setProvider(newProvider);
+
       setUserAddress(accounts[0]);
-      setProvider(new ethers.BrowserProvider(ethereum));
       setNetworkError(false);
       setConnectionStatus("Connected to Hardhat.");
     } catch (error) {

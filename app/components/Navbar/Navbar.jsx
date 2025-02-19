@@ -1,7 +1,7 @@
-import { useMetamask } from '../../hooks/web3/useMetamask'; // Adjust the path to your hook
+import { useMetamask } from '../../hooks/web3/useMetamask';
 
 export default function Navbar({ darkMode, setCurrentPage }) {
-  const { accounts, userAddress, connect, disconnect, connectionStatus, networkError } = useMetamask();
+  const { userAddress, connect, disconnect, connectionStatus, networkError } = useMetamask();
 
   return (
     <nav className={`${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"} p-4 shadow-md flex items-center justify-between`}>
@@ -14,16 +14,32 @@ export default function Navbar({ darkMode, setCurrentPage }) {
       </div>
       <div className="flex items-center gap-4">
         <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
-        {connectionStatus && <p>{connectionStatus}</p>} {/* Show success message */}
-        {networkError && <p style={{ color: 'red' }}>Please switch to the correct network.</p>} {/* Show network error */}
+
+        {connectionStatus && <p className="text-green-500">{connectionStatus}</p>}
+
+        {networkError && (
+          <p className="text-red-500">
+            ⚠️ Wrong network! Please switch to Hardhat (Chain ID: 31337).
+          </p>
+        )}
 
         {userAddress ? (
-          <div>
-            <p>Connected account: {userAddress}</p>
-            <button onClick={disconnect}>Disconnect</button>
+          <div className="flex items-center gap-3">
+            <p>Connected: {userAddress.slice(0, 6)}...{userAddress.slice(-4)}</p>
+            <button 
+              onClick={disconnect} 
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            >
+              Disconnect
+            </button>
           </div>
         ) : (
-          <button onClick={connect}>Connect MetaMask</button>
+          <button 
+            onClick={connect} 
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            {connectionStatus ? connectionStatus : "Connect MetaMask"}
+          </button>
         )}
       </div>
     </nav>

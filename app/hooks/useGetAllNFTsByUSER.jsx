@@ -17,7 +17,8 @@ const useGetAllNFTsByUser = (provider, userAddress) => {
     setError(null);
 
     try {
-      const contract = new ethers.Contract(contractAddress, AuctionABI.abi, provider);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, AuctionABI.abi, signer);
 
       // 🔥 Correct function call (view function doesn't need signer)
       const userNFTs = await contract.getAllNFTsByUser();
@@ -82,3 +83,5 @@ const useGetAllNFTsByUser = (provider, userAddress) => {
 
   return { nfts, loading, error, refetchNFTs: fetchNFTs }; // Return fetchNFTs as refetchNFTs
 };
+
+export default useGetAllNFTsByUser;
