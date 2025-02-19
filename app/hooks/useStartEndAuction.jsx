@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ethers } from "ethers";
-import AuctionABI from "../contracts/AuctionAbi.json"; // Adjust path to your contract ABI
+import { ethers } from "ethers"; // Ensure you're importing ethers correctly
+import auctionABI from "../contracts/AuctionAbi.json"; // Ensure the path to your Auction ABI is correct
 
 const useStartEndAuction = (provider, userAddress) => {
   const [loading, setLoading] = useState(false);
@@ -10,23 +10,26 @@ const useStartEndAuction = (provider, userAddress) => {
   const startAuction = async (nftTokenId, startingPrice, duration) => {
     if (!provider || !userAddress) return;
 
-    // Get signer from provider (to send transactions)
-    const signer = provider.getSigner();
-
-    // Create contract instance with signer
-    const contract = new ethers.Contract(
-      process.env.NEXT_PUBLIC_AUCTION_ADDRESS,
-      AuctionABI.abi,
-      provider
-    );
-
-    setLoading(true);
-    setError(null);
-
     try {
+      setLoading(true);
+      setError(null); // Reset the error before starting the transaction
+
+      // Ensure the provider is a Web3Provider and get the signer
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      // Create the contract instance with signer
+      const contract = new ethers.Contract(
+        process.env.NEXT_PUBLIC_AUCTION_ADDRESS,
+        auctionABI.abi,
+        signer // Use the signer to send transactions
+      );
+
       console.log("Starting the auction on contract with NFT token ID:", nftTokenId);
-      // Call the startAuction function from the contract
+
+      // Send the startAuction transaction to the contract
       const tx = await contract.startAuction(nftTokenId, startingPrice, duration);
+
       console.log("Transaction sent: ", tx);
       await tx.wait(); // Wait for the transaction to be mined
       alert(`Auction for NFT ${nftTokenId} started successfully`);
@@ -42,20 +45,22 @@ const useStartEndAuction = (provider, userAddress) => {
   const endAuction = async (nftTokenId) => {
     if (!provider || !userAddress) return;
 
-    // Get signer from provider (to send transactions)
-    const signer = provider.getSigner();
-
-    // Create contract instance with signer
-    const contract = new ethers.Contract(
-      process.env.NEXT_PUBLIC_AUCTION_ADDRESS,
-      AuctionABI.abi,
-      signer // Signer to send transactions
-    );
-
-    setLoading(true);
-    setError(null);
-
     try {
+      setLoading(true);
+      setError(null); // Reset the error before starting the transaction
+
+      // Ensure the provider is a Web3Provider and get the signer
+      const web3Provider = new ethers.BrowserProvider(ethereum)
+      const signer = web3Provider.getSigner();
+
+      // Create the contract instance with signer
+      const contract = new ethers.Contract(
+        process.env.NEXT_PUBLIC_AUCTION_ADDRESS,
+        auctionABI.abi,
+        signer // Use the signer to send transactions
+      );
+
+      // Send the endAuction transaction to the contract
       const tx = await contract.endAuction(nftTokenId);
       await tx.wait();
       alert(`Auction for NFT ${nftTokenId} ended successfully`);

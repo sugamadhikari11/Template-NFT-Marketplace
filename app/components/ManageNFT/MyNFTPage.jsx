@@ -36,7 +36,7 @@ const MyNFTs = () => {
   }, []);
 
   // Fetch NFTs by user
-  const { nfts, loading, error } = useGetAllNFTsByUser(provider, userAddress);
+  const { nfts, loading, error, refetchNFTs } = useGetAllNFTsByUser(provider, userAddress);
 
   useEffect(() => {
     if (nfts) {
@@ -83,20 +83,20 @@ const MyNFTs = () => {
     }
   
     console.log("Submitting auction with the following details:");
-    console.log("Token ID:", selectedNFT.tokenId);
+    console.log("Token ID:", selectedNFT.id);
     console.log("Starting Price:", startingPrice);
     console.log("Duration:", duration);
   
     try {
-      await startAuction(selectedNFT.tokenId, ethers.parseEther(startingPrice), duration);
+      await startAuction(selectedNFT.id, ethers.parseEther(startingPrice), duration);
       console.log("Auction started successfully");
       handleModalClose(); // Close the modal after starting auction
+      refetchNFTs(); // Refetch NFTs after the auction has been started
     } catch (err) {
       console.error("Error starting auction:", err);
       alert("Failed to start auction. Check the console for errors.");
     }
   };
-  
 
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
@@ -136,6 +136,7 @@ const MyNFTs = () => {
                   <p>No image available</p>
                 )}
                 <h3 className="text-lg font-semibold mt-2">{nft.description}</h3>
+                <p className="text-xs text-gray-400">ID: {nft.id}</p>
                 <p className="text-xs text-gray-400">Token ID: {nft.tokenId}</p>
                 <p className="text-sm font-bold">Price: {nft.initialPrice} ETH</p>
                 <p className="text-sm text-gray-500">Status: {nft.status}</p>

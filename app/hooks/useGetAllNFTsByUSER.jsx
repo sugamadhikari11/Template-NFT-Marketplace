@@ -39,6 +39,7 @@ const useGetAllNFTsByUser = (provider, userAddress) => {
           }
 
           return {
+            id: nft.nftId.toString(),
             tokenId: nft.tokenId.toString(),
             nftAddress: nft.nftAddress,
             owner: nft.owner,
