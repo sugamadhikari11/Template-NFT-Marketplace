@@ -23,13 +23,30 @@ const useGetAllNFTsByUser = (provider, userAddress) => {
         const userNFTs = await contract.getAllNFTsByUser();
 
         // 🔄 Convert BigNumbers and format data
-        const formattedNFTs = userNFTs.map(nft => ({
-          tokenId: nft.tokenId.toString(),
-          nftAddress: nft.nftAddress,
-          owner: nft.owner,
-          description: nft.description,
-          image: nft.image ? nft.image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/") : null,
-          initialPrice: ethers.formatEther(nft.initialPrice),
+        const formattedNFTs = await Promise.all(userNFTs.map(async (nft) => {
+          const metadataUri = nft.metadataUri ? nft.metadataUri.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/") : null;
+          let image = null;
+
+          // Fetch metadata if URI exists
+          if (metadataUri) {
+            try {
+              const response = await fetch(metadataUri);
+              const metadata = await response.json();
+              image = metadata.image ? metadata.image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/") : null;
+            } catch (err) {
+              console.error("Error fetching metadata:", err);
+            }
+          }
+
+          return {
+            tokenId: nft.tokenId.toString(),
+            nftAddress: nft.nftAddress,
+            owner: nft.owner,
+            description: nft.description,
+            image,
+            initialPrice: ethers.formatEther(nft.initialPrice),
+            status: mapStatus(parseInt(nft.status)),  
+          };
         }));
 
         setNFTs(formattedNFTs);
@@ -43,6 +60,21 @@ const useGetAllNFTsByUser = (provider, userAddress) => {
 
     fetchNFTs();
   }, [provider, userAddress]);
+
+   const mapStatus = (status) => {
+    switch (status) {
+      case 0:
+        return "Pending";
+      case 1:
+        return "Active";
+      case 2:
+        return "Ended";
+      case 3:
+        return "Revoked";
+      default:
+        return "Unknown";
+    }
+  };
 
   return { nfts, loading, error };
 };
