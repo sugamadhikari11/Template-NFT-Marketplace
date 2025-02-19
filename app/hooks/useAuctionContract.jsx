@@ -1,163 +1,53 @@
-import { useState, useEffect, useCallback } from "react";
-
+import { useState } from "react";
 import { ethers } from "ethers";
+import auctionABI from "../contracts/AuctionAbi.json";
+import nftABI from "../contracts/NFTAbi.json";
 
-import AuctionContractABI from "../contracts/AuctionAbi.json"; // Adjust the path as necessary
-
-import { useMetamask } from "./useMetamask"; // Ensure you have this hook
-
+// Read auction contract address from environment variables
+const auctionAddress = process.env.NEXT_PUBLIC_AUCTION_ADDRESS;
 
 const useAuctionContract = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const { provider, signer } = useMetamask(); // Get provider and signer from MetaMask
-
-  const contractAddress = process.env.NEXT_PUBLIC_AUCTION_CONTRACT_ADDRESS; // Read from .env
-
-  const auctionContractAbi = AuctionContractABI.abi; // Use the ABI from the contract
-
-
-  const [contract, setContract] = useState(null);
-
-  const [activeAuctions, setActiveAuctions] = useState([]);
-
-  const [pendingAuctions, setPendingAuctions] = useState([]);
-
-  const [endedAuctions, setEndedAuctions] = useState([]);
-
-  const [userNFTs, setUserNFTs] = useState([]);
-
-
-  useEffect(() => {
-
-    if (provider && contractAddress) {
-
-      const auctionContract = new ethers.Contract(
-
-        contractAddress,
-
-        auctionContractAbi,
-
-        signer // Use the signer from useMetamask
-
-      );
-
-      setContract(auctionContract);
-
-    }
-
-  }, [provider, contractAddress, signer]);
-
-
-  // Function to add an NFT to the auction
-
-  const addNFT = useCallback(async (nftAddress, tokenId, description, initialPrice) => {
-
-    if (!contract) return;
-
-
+  const approveAndAddNFT = async (nftAddress, tokenId, description, initialPrice) => {
     try {
+      if (!window.ethereum) throw new Error("No crypto wallet found.");
+      if (!auctionAddress) throw new Error("Auction contract address is missing.");
+      if (!nftAddress || !tokenId || !description || !initialPrice) {
+        throw new Error("All fields are required.");
+      }
 
-      console.log("Adding NFT with the following details:");
+      setLoading(true);
+      setError(null); // Reset error before transaction
 
-      console.log("NFT Address:", nftAddress);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
-      console.log("Token ID:", tokenId);
+      // ✅ Step 1: Approve Auction Contract
+      const nftContract = new ethers.Contract(nftAddress, nftABI.abi, signer);
+      const approvalTx = await nftContract.approve(auctionAddress, tokenId);
+      await approvalTx.wait();
 
-      console.log("Description:", description);
+      // ✅ Step 2: Convert Initial Price to Wei
+      const priceInWei = ethers.parseUnits(initialPrice, "ether"); // Use parseUnits for ethers v6
 
-      console.log("Initial Price:", initialPrice);
+      // ✅ Step 3: Add NFT to Auction
+      const auctionContract = new ethers.Contract(auctionAddress, auctionABI.abi, signer);
+      const auctionTx = await auctionContract.addNFT(nftAddress, tokenId, description, priceInWei);
+      await auctionTx.wait();
 
-
-      const tx = await contract.addNFT(nftAddress, tokenId, description, initialPrice);
-
-      console.log("Transaction Hash:", tx.hash);
-
-      await tx.wait();
-
-      console.log("NFT added to auction successfully!");
-
-    } catch (error) {
-
-      console.error("Error adding NFT to auction:", error);
-
-      throw new Error("Failed to add NFT to auction. Please check the console for more details.");
-
+      setLoading(false);
+      return auctionTx;
+    } catch (err) {
+      console.error("Error in approveAndAddNFT:", err);
+      setError(err.message);
+      setLoading(false);
+      throw err; // Rethrow error for the calling component
     }
-
-  }, [contract]);
-
-  // Function to start an auction
-  const startAuction = useCallback(async (nftId, startingPrice, duration) => {
-    if (!contract) return;
-    const tx = await contract.startAuction(nftId, startingPrice, duration);
-    await tx.wait();
-  }, [contract]);
-
-  // Function to place a bid on an auction
-  const placeBid = useCallback(async (nftId, bidAmount) => {
-    if (!contract) return;
-    const tx = await contract.placeBid(nftId, { value: bidAmount });
-    await tx.wait();
-  }, [contract]);
-
-  // Function to end an auction
-  const endAuction = useCallback(async (nftId) => {
-    if (!contract) return;
-    const tx = await contract.endAuction(nftId);
-    await tx.wait();
-  }, [contract]);
-
-  // Function to revoke an auction
-  const revokeAuction = useCallback(async (nftId) => {
-    if (!contract) return;
-    const tx = await contract.revokeAuction(nftId);
-    await tx.wait();
-  }, [contract]);
-
-  // Function to fetch active, pending, and ended auctions
-  const fetchAuctions = useCallback(async () => {
-    if (!contract) return;
-    try {
-      const active = await contract.getAllAuctions(0);  // 0 for Active status
-      const pending = await contract.getAllAuctions(1);  // 1 for Pending status
-      const ended = await contract.getAllAuctions(2);  // 2 for Ended status
-      setActiveAuctions(active);
-      setPendingAuctions(pending);
-      setEndedAuctions(ended);
-    } catch (error) {
-      console.error("Error fetching auctions:", error);
-    }
-  }, [contract]);
-
-  // Fetch user NFTs
-  const fetchUserNFTs = useCallback(async () => {
-    if (!contract) return;
-    try {
-      const nfts = await contract.getAllNFTsByUser();
-      setUserNFTs(nfts);
-    } catch (error) {
-      console.error("Error fetching user NFTs:", error);
-    }
-  }, [contract]);
-
-  // Use the fetchAuctions and fetchUserNFTs on mount to populate state
-  useEffect(() => {
-    fetchAuctions();
-    fetchUserNFTs();
-  }, [fetchAuctions, fetchUserNFTs]);
-
-  return {
-    addNFT,
-    startAuction,
-    placeBid,
-    endAuction,
-    revokeAuction,
-    activeAuctions,
-    pendingAuctions,
-    endedAuctions,
-    userNFTs,
-    fetchUserNFTs
   };
+
+  return { approveAndAddNFT, loading, error };
 };
 
 export default useAuctionContract;

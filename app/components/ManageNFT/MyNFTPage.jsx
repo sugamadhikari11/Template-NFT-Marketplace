@@ -1,52 +1,32 @@
-import React, { useEffect, useState } from "react";
-import useAuctionContract from "../../hooks/useAuctionContract"; // Adjust the path as necessary
-import { ethers } from "ethers";
+import React from 'react';
+import useGetAllNFTsByUser from '../../hooks/useGetAllNFTsByUSER';
+import { useMetamask } from '../../hooks/useMetamask'; // Assuming you have a hook to get the provider and user address
 
-const UserNFTsPage = () => {
-  const { userNFTs, fetchUserNFTs } = useAuctionContract(); // Get user NFTs and fetch function
-  const [loading, setLoading] = useState(true);
+const NFTList = () => {
+  const { provider, userAddress } = useMetamask();
+  const { nfts, loading, error } = useGetAllNFTsByUser(provider, userAddress);
 
-  useEffect(() => {
-    const loadNFTs = async () => {
-      setLoading(true);
-      try {
-        console.log("Fetching user NFTs...");
-        await fetchUserNFTs(); // Fetch user NFTs
-      } catch (error) {
-        console.error("Error loading NFTs:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadNFTs();
-  }, [fetchUserNFTs]); // Fetch user NFTs on component mount
-
-  if (loading) {
-    return <div>Loading your NFTs...</div>;
-  }
+  if (loading) return <p>Loading NFTs...</p>;
+  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
 
   return (
     <div>
-      <h1>Your NFTs</h1>
-      {userNFTs.length === 0 ? (
-        <p>You don't own any NFTs.</p>
+      <h2>Your NFTs</h2>
+      {nfts.length === 0 ? (
+        <p>No NFTs found.</p>
       ) : (
-        <div>
-          {userNFTs.map((nft, index) => (
-            <div key={index} className="nft-item">
-              <h3>{nft.description}</h3>
-              <p>
-                Token ID: {nft.tokenId} <br />
-                Price: {ethers.utils.formatEther(nft.initialPrice)} ETH
-              </p>
-              <img src={nft.imageUrl} alt={`NFT ${nft.tokenId}`} />
-            </div>
+        <ul>
+          {nfts.map((nft, index) => (
+            <li key={index}>
+              <p>Token ID: {nft.tokenId.toString()}</p>
+              <p>Description: {nft.description}</p>
+              <p>Price: {ethers.utils.formatEther(nft.price)} ETH</p>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
 };
 
-export default UserNFTsPage;
+export default NFTList;
