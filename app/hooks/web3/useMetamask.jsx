@@ -14,12 +14,18 @@ export function useMetamask() {
     if (!ethereum) return;
 
     const handleAccountsChanged = (accounts) => {
-      setUserAddress(accounts.length ? accounts[0] : null);
+      if (accounts.length) {
+        setUserAddress(accounts[0]);
+        window.location.reload();
+      } else {
+        setUserAddress(null);
+      }
     };
 
     const handleChainChanged = (chainId) => {
       const parsedChainId = parseInt(chainId, 16); // Convert from hex to decimal
       setNetworkError(parsedChainId !== Number(HARDHAT_NETWORK_ID));
+      window.location.reload();
     };
 
     ethereum.on("accountsChanged", handleAccountsChanged);
