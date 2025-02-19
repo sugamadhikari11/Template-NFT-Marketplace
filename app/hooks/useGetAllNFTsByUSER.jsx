@@ -4,13 +4,12 @@ import AuctionABI from "../contracts/AuctionAbi.json";
 
 const contractAddress = process.env.NEXT_PUBLIC_AUCTION_ADDRESS;
 
-const useGetAllNFTsByUser = (provider) => {
+const useGetAllNFTsByUser = (provider, userAddress) => {
   const [nfts, setNFTs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userAddress, setUserAddress] = useState(null); // Track active account
 
-  // Fetch NFTs owned by the user
+  // Function to fetch NFTs
   const fetchNFTs = useCallback(async () => {
     if (!provider || !userAddress) return;
 
@@ -19,89 +18,53 @@ const useGetAllNFTsByUser = (provider) => {
 
     try {
       const contract = new ethers.Contract(contractAddress, AuctionABI.abi, provider);
+
+      // 🔥 Correct function call (view function doesn't need signer)
       const userNFTs = await contract.getAllNFTsByUser();
 
-      const formattedNFTs = await Promise.all(
-        userNFTs.map(async (nft) => {
-          const metadataUri = nft.metadataUri
-            ? nft.metadataUri.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/")
-            : null;
-          let image = null;
+      // 🔄 Convert BigNumbers and format data
+      const formattedNFTs = await Promise.all(userNFTs.map(async (nft) => {
+        const metadataUri = nft.metadataUri ? nft.metadataUri.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/") : null;
+        let image = null;
 
-          if (metadataUri) {
-            try {
-              const response = await fetch(metadataUri);
-              const metadata = await response.json();
-              image = metadata.image
-                ? metadata.image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/")
-                : null;
-            } catch (err) {
-              console.error("Error fetching metadata:", err);
-            }
+        // Fetch metadata if URI exists
+        if (metadataUri) {
+          try {
+            const response = await fetch(metadataUri);
+            const metadata = await response.json();
+            image = metadata.image ? metadata.image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/") : null;
+          } catch (err) {
+            console.error("Error fetching metadata:", err);
           }
+        }
 
-          return {
-            id: nft.nftId.toString(),
-            tokenId: nft.tokenId.toString(),
-            nftAddress: nft.nftAddress,
-            owner: nft.owner.toLowerCase(),
-            description: nft.description,
-            image,
-            initialPrice: ethers.formatEther(nft.initialPrice),
-            status: mapStatus(parseInt(nft.status)),
-          };
-        })
-      );
+        return {
+          id: nft.nftId.toString(),
+          tokenId: nft.tokenId.toString(),
+          nftAddress: nft.nftAddress,
+          owner: nft.owner,
+          description: nft.description,
+          image,
+          initialPrice: ethers.formatEther(nft.initialPrice),
+          status: mapStatus(parseInt(nft.status)),  
+        };
+      }));
 
-      // 🔥 Filter NFTs to show only those belonging to `userAddress`
-      const userOwnedNFTs = formattedNFTs.filter((nft) => nft.owner === userAddress.toLowerCase());
-
-      setNFTs(userOwnedNFTs);
+      setNFTs(formattedNFTs);
     } catch (err) {
       console.error("Error fetching NFTs:", err);
       setError(err.message || "Failed to fetch NFTs");
     } finally {
       setLoading(false);
     }
-  }, [provider, userAddress]); // Ensure `userAddress` triggers re-fetch
+  }, [provider, userAddress]); // Dependencies
 
-  // Track connected account and update `userAddress`
+  // Run the fetch function when provider and userAddress change
   useEffect(() => {
-    if (window.ethereum) {
-      const fetchAccount = async () => {
-        const accounts = await window.ethereum.request({ method: "eth_accounts" });
-        if (accounts.length > 0) {
-          setUserAddress(accounts[0]); // Update account state
-        }
-      };
+    fetchNFTs();
+  }, [fetchNFTs]);
 
-      fetchAccount();
-
-      const handleAccountsChanged = (accounts) => {
-        if (accounts.length > 0) {
-          setUserAddress(accounts[0]); // Update state when account switches
-        } else {
-          setUserAddress(null);
-          setNFTs([]); // Clear NFTs when disconnected
-        }
-      };
-
-      window.ethereum.on("accountsChanged", handleAccountsChanged);
-      return () => {
-        window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
-      };
-    }
-  }, []);
-
-  // Re-fetch NFTs when userAddress updates
-  useEffect(() => {
-    if (userAddress) {
-      fetchNFTs();
-    } else {
-      setNFTs([]); // Clear NFTs if no account connected
-    }
-  }, [userAddress, fetchNFTs]);
-
+  // Helper function to map status
   const mapStatus = (status) => {
     switch (status) {
       case 0:
@@ -117,7 +80,5 @@ const useGetAllNFTsByUser = (provider) => {
     }
   };
 
-  return { nfts, loading, error, refetchNFTs: fetchNFTs };
+  return { nfts, loading, error, refetchNFTs: fetchNFTs }; // Return fetchNFTs as refetchNFTs
 };
-
-export default useGetAllNFTsByUser;
