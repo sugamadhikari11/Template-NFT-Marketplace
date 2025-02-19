@@ -1,32 +1,47 @@
-import React from 'react';
-import useGetAllNFTsByUser from '../../hooks/useGetAllNFTsByUSER';
-import { useMetamask } from '../../hooks/useMetamask'; // Assuming you have a hook to get the provider and user address
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import useGetAllNFTsByUser from "../../hooks/useGetAllNFTsByUSER";
 
-const NFTList = () => {
-  const { provider, userAddress } = useMetamask();
+const MyNFTs = () => {
+  const [provider, setProvider] = useState(null);
+  const [userAddress, setUserAddress] = useState("");
+
+  useEffect(() => {
+    if (!window.ethereum) return;
+
+    const loadProvider = async () => {
+      const web3Provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await web3Provider.getSigner();
+      const address = await signer.getAddress();
+
+      setProvider(web3Provider);
+      setUserAddress(address);
+    };
+
+    loadProvider();
+  }, []);
+
   const { nfts, loading, error } = useGetAllNFTsByUser(provider, userAddress);
 
-  if (loading) return <p>Loading NFTs...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-
   return (
-    <div>
-      <h2>Your NFTs</h2>
-      {nfts.length === 0 ? (
-        <p>No NFTs found.</p>
-      ) : (
-        <ul>
-          {nfts.map((nft, index) => (
-            <li key={index}>
-              <p>Token ID: {nft.tokenId.toString()}</p>
-              <p>Description: {nft.description}</p>
-              <p>Price: {ethers.utils.formatEther(nft.price)} ETH</p>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-4">My Auction NFTs</h2>
+
+      {loading && <p>Loading NFTs...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      <div className="grid grid-cols-2 gap-4">
+        {nfts.map((nft) => (
+          <div key={nft.tokenId} className="border p-4 rounded-lg">
+            {nft.image && <img src={nft.image} alt={nft.description} className="w-full h-40 object-cover rounded-md" />}
+            <h3 className="text-lg font-semibold mt-2">{nft.description}</h3>
+            <p className="text-xs text-gray-400">Token ID: {nft.tokenId}</p>
+            <p className="text-sm font-bold">Price: {nft.initialPrice} ETH</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default NFTList;
+export default MyNFTs;

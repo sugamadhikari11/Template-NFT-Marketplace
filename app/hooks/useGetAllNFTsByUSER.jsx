@@ -1,12 +1,8 @@
-import { useEffect, useState } from 'react';
-import { ethers } from 'ethers';
-import AuctionABI from '../contracts/AuctionAbi.json'; // Import your contract ABI
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import AuctionABI from "../contracts/AuctionAbi.json";
 
-const contractAddress = '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'; // Your contract address
-
-
-// Replace with your contract's ABI and address
-const contractABI = AuctionABI.abi
+const contractAddress = process.env.NEXT_PUBLIC_AUCTION_ADDRESS;
 
 const useGetAllNFTsByUser = (provider, userAddress) => {
   const [nfts, setNFTs] = useState([]);
@@ -21,17 +17,25 @@ const useGetAllNFTsByUser = (provider, userAddress) => {
       setError(null);
 
       try {
-        // Create a contract instance
-        const contract = new ethers.Contract(contractAddress, contractABI, provider);
+        const contract = new ethers.Contract(contractAddress, AuctionABI.abi, provider);
 
-        // Call the `getAllNFTsByUser` function
-        const nfts = await contract.getAllNFTsByUser({ from: userAddress });
+        // 🔥 Correct function call (view function doesn't need signer)
+        const userNFTs = await contract.getAllNFTsByUser();
 
-        // Update state with the fetched NFTs
-        setNFTs(nfts);
+        // 🔄 Convert BigNumbers and format data
+        const formattedNFTs = userNFTs.map(nft => ({
+          tokenId: nft.tokenId.toString(),
+          nftAddress: nft.nftAddress,
+          owner: nft.owner,
+          description: nft.description,
+          image: nft.image ? nft.image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/") : null,
+          initialPrice: ethers.formatEther(nft.initialPrice),
+        }));
+
+        setNFTs(formattedNFTs);
       } catch (err) {
-        console.error('Error fetching NFTs:', err);
-        setError(err.message || 'Failed to fetch NFTs');
+        console.error("Error fetching NFTs:", err);
+        setError(err.message || "Failed to fetch NFTs");
       } finally {
         setLoading(false);
       }
