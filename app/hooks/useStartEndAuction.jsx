@@ -75,8 +75,8 @@ const useStartEndAuction = (provider, userAddress) => {
       setError(null); // Reset the error before starting the transaction
 
       // Ensure the provider is a Web3Provider and get the signer
-      const web3Provider = new ethers.BrowserProvider(ethereum)
-      const signer = web3Provider.getSigner();
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
       // Create the contract instance with signer
       const contract = new ethers.Contract(
