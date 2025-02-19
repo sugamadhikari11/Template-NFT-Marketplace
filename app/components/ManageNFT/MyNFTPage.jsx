@@ -88,7 +88,7 @@ const MyNFTs = () => {
     console.log("Duration:", duration);
   
     try {
-      await startAuction(selectedNFT.id, ethers.parseEther(startingPrice), duration);
+      await startAuction(selectedNFT.id, ethers.parseUnits(startingPrice), duration);
       console.log("Auction started successfully");
       handleModalClose(); // Close the modal after starting auction
       refetchNFTs(); // Refetch NFTs after the auction has been started

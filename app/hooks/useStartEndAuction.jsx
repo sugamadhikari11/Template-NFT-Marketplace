@@ -7,7 +7,7 @@ const useStartEndAuction = (provider, userAddress) => {
   const [error, setError] = useState(null);
 
   // Start Auction function
-  const startAuction = async (nftTokenId, startingPrice, duration) => {
+  const startAuction = async (id, startingPrice, duration) => {
     if (!provider || !userAddress) return;
 
     try {
@@ -25,14 +25,14 @@ const useStartEndAuction = (provider, userAddress) => {
         signer // Use the signer to send transactions
       );
 
-      console.log("Starting the auction on contract with NFT token ID:", nftTokenId);
+      console.log("Starting the auction on contract with NFT ID:", id);
 
       // Send the startAuction transaction to the contract
-      const tx = await contract.startAuction(nftTokenId, startingPrice, duration);
+      const tx = await contract.startAuction(id, startingPrice, duration);
 
       console.log("Transaction sent: ", tx);
       await tx.wait(); // Wait for the transaction to be mined
-      alert(`Auction for NFT ${nftTokenId} started successfully`);
+      alert(`Auction for NFT ${id} started successfully`);
     } catch (err) {
       console.error("Error starting auction:", err);
       setError("Failed to start auction");

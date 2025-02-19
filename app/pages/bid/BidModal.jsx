@@ -4,7 +4,7 @@ import usePlaceBid from "../../hooks/usePlaceBid";
 import { Auction_ADDRESS } from "../../../utils/config";
 import { ethers } from "ethers";
 
-const BidModal = ({ auction, isOpen, onClose }) => {
+const BidModal = ({ auction, isOpen, onClose, fetchAuctions }) => {
   const [bidAmount, setBidAmount] = useState("");
   const { provider, connect, userAddress } = useMetamask();
   const { placeBid, loading, error } = usePlaceBid(Auction_ADDRESS);
@@ -28,8 +28,8 @@ const BidModal = ({ auction, isOpen, onClose }) => {
       }
 
       // Convert bidAmount to Wei
-      const bidAmountInWei = ethers.parseEther(bidAmount.toString());
-
+      const bidAmountInWei = ethers.parseUnits(bidAmount.toString());
+   
       console.log("Placing bid with:", {
         id: auction.id,
         bidAmount: bidAmountInWei.toString(),
@@ -37,6 +37,7 @@ const BidModal = ({ auction, isOpen, onClose }) => {
         auctionStatus: auction.status,
         auctionEndTime: auction.auctionEndTime,
         currentHighestBid: auction.highestBid,
+        BidAmount: bidAmount,
       });
 
       // Auction status checks
@@ -59,6 +60,7 @@ const BidModal = ({ auction, isOpen, onClose }) => {
 
       alert("Bid placed successfully!");
       onClose();
+      fetchAuctions();
     } catch (error) {
       console.error("Bid error:", error);
       alert(error.reason || error.message);

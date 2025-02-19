@@ -20,7 +20,7 @@ const RunningAuctions = () => {
   }, []);
 
   // Fetch active auctions
-  const { auctions, loading, error } = useGetAllAuctionsByStatus(provider, "Active");
+  const { auctions, loading, error, fetchAuctions } = useGetAllAuctionsByStatus(provider, "Active");
 
   // Open modal
   const openModal = (auction) => {
@@ -55,7 +55,7 @@ const RunningAuctions = () => {
             )}
             <h3 className="text-lg font-semibold mt-2">{auction.description}</h3>
             <p className="text-xs text-gray-400">Token ID: {auction.tokenId}</p>
-            <p className="text-sm font-bold">Starting Price: {auction.startingPrice} ETH</p>
+            <p className="text-sm font-bold">Starting Price: {auction.highestBid} ETH</p>
             <p className="text-sm text-gray-500">Status: {auction.status}</p>
 
             {/* Place Bid Button */}
@@ -70,7 +70,7 @@ const RunningAuctions = () => {
       </div>
 
       {/* Use the BidModal Component */}
-      <BidModal auction={selectedAuction} isOpen={isModalOpen} onClose={closeModal} />
+      <BidModal auction={selectedAuction} isOpen={isModalOpen} onClose={closeModal} fetchAuctions={fetchAuctions}  />
     </div>
   );
 };

@@ -60,6 +60,24 @@ const useGetAllNFTsByUser = (provider, userAddress) => {
     }
   }, [provider, userAddress]); // Dependencies
 
+  // Listen for account changes
+  useEffect(() => {
+    if (window.ethereum) {
+      const handleAccountsChanged = (accounts) => {
+        if (accounts.length > 0) {
+          console.log("Account changed:", accounts[0]);
+          fetchNFTs(); // 🔄 Reload NFTs when account changes
+        }
+      };
+
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+
+      return () => {
+        window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+      };
+    }
+  }, [fetchNFTs]);
+
   // Run the fetch function when provider and userAddress change
   useEffect(() => {
     fetchNFTs();

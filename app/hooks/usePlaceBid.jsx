@@ -19,9 +19,9 @@ const usePlaceBid = (contractAddress) => {
       const contract = new ethers.Contract(contractAddress, contractABI.abi, signer);
 
       // Convert bidAmount to Wei
-      const bidInWei = ethers.parseEther(bidAmount.toString());
 
-      const tx = await contract.placeBid(nftId, { value: bidInWei });
+
+      const tx = await contract.placeBid(nftId, { value: bidAmount });
 
       await tx.wait(); // Wait for transaction confirmation
 
