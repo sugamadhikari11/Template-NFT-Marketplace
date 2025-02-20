@@ -53,8 +53,8 @@ const AddNFT = () => {
   // ✅ Approve & List NFT on Auction
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nftAddress || !tokenId || !description || !initialPrice) {
-      alert("Please fill in all fields");
+    if (!description || !initialPrice) {
+      alert("Please enter description and initial price");
       return;
     }
 
@@ -77,6 +77,7 @@ const AddNFT = () => {
     <div className="max-w-2xl mx-auto mt-10 p-6 rounded-lg shadow-md mb-20">
       <h2 className="text-2xl font-bold mb-4">Add NFT to Auction</h2>
       <form onSubmit={handleSubmit}>
+        {/* NFT Address Input */}
         <div className="mb-4">
           <label className="block text-gray-700">NFT Address:</label>
           <input
@@ -88,6 +89,7 @@ const AddNFT = () => {
           />
         </div>
 
+        {/* Token ID Input */}
         <div className="mb-4">
           <label className="block text-gray-700">Token ID:</label>
           <input
@@ -99,28 +101,7 @@ const AddNFT = () => {
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700">Description:</label>
-          <input
-            type="text"
-            className="w-full p-2 bg-transparent border border-gray-300 rounded"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700">Initial Price (ETH):</label>
-          <input
-            type="text"
-            className="w-full p-2 bg-transparent border border-gray-300 rounded"
-            value={initialPrice}
-            onChange={(e) => setInitialPrice(e.target.value)}
-            required
-          />
-        </div>
-
+        {/* Load NFT Button */}
         <button
           type="button"
           className="w-full bg-orange-500 text-white p-2 rounded hover:bg-purple-600"
@@ -130,23 +111,52 @@ const AddNFT = () => {
           {loadingNFT ? "Loading..." : "Load NFT"}
         </button>
 
+        {/* NFT Display (Only Show After Loading) */}
         {nftData && (
           <div className="mt-5 font-bold">
             <p className="text-md text-gray-600">NFT Image:</p>
             {nftData.image && (
-              <img src={nftData.image} alt="NFT" className=" w-full h-45 rounded-md" />
+              <img src={nftData.image} alt="NFT" className="w-full h-45 rounded-md" />
             )}
           </div>
         )}
 
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mt-4"
-          disabled={loadingTransaction}
-        >
-          {loadingTransaction ? status : "Approve & Add NFT to Auction"}
-        </button>
+        {/* Show These Fields Only After NFT is Loaded */}
+        {nftData && (
+          <>
+            <div className="mt-4">
+              <label className="block text-gray-700">Description:</label>
+              <input
+                type="text"
+                className="w-full p-2 bg-transparent border border-gray-300 rounded"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
+            </div>
 
+            <div className="mt-4">
+              <label className="block text-gray-700">Initial Price (ETH):</label>
+              <input
+                type="text"
+                className="w-full p-2 bg-transparent border border-gray-300 rounded"
+                value={initialPrice}
+                onChange={(e) => setInitialPrice(e.target.value)}
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mt-4"
+              disabled={loadingTransaction}
+            >
+              {loadingTransaction ? status : "Approve & Add NFT to Auction"}
+            </button>
+          </>
+        )}
+
+        {/* Error Message */}
         {error && <p className="mt-2 text-red-500">Error: {error}</p>}
       </form>
     </div>

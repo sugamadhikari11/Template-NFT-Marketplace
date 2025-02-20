@@ -7,17 +7,18 @@ const LandingPage = ({ setCurrentPage }) => {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-blue-900 to-purple-900 text-white">
       {/* Moving Background Blocks */}
-      <motion.div
+            {/* Moving Background Blocks - Right Side */}
+            <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 2 }}
         className="absolute inset-0 overflow-hidden"
       >
-        {[...Array(10)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <motion.div
-            key={i}
-            initial={{ y: -100, x: Math.random() * 1000, rotate: Math.random() * 360 }}
-            animate={{ y: window.innerHeight, x: Math.random() * 1000, rotate: Math.random() * 360 }}
+            key={`right-${i}`}
+            initial={{ y: -100, x: Math.random() * window.innerWidth * 0.5 + window.innerWidth * 0.5, rotate: Math.random() * 360 }}
+            animate={{ y: window.innerHeight, x: Math.random() * window.innerWidth * 0.5 + window.innerWidth * 0.5, rotate: Math.random() * 360 }}
             transition={{
               duration: Math.random() * 10 + 10,
               repeat: Infinity,
@@ -28,6 +29,30 @@ const LandingPage = ({ setCurrentPage }) => {
           />
         ))}
       </motion.div>
+
+      {/* Moving Background Blocks - Left Side */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2 }}
+        className="absolute inset-0 overflow-hidden"
+      >
+        {[...Array(30)].map((_, i) => (
+          <motion.div
+            key={`left-${i}`}
+            initial={{ y: -100, x: Math.random() * window.innerWidth * 0.5, rotate: Math.random() * 360 }}
+            animate={{ y: window.innerHeight, x: Math.random() * window.innerWidth * 0.5, rotate: Math.random() * 360 }}
+            transition={{
+              duration: Math.random() * 10 + 10,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "linear",
+            }}
+            className="absolute w-4 h-4 bg-white/10 rounded-full"
+          />
+        ))}
+      </motion.div>
+
 
       {/* Hero Section */}
       <div className="relative flex flex-col items-center justify-center h-screen">
