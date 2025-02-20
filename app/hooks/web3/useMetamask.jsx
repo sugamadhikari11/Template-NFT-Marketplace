@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 
-const HARDHAT_NETWORK_ID = "31337";  // Hardhat Network ID in Decimal
+const SEPOLIA_NETWORK_ID = "11155111";  // Sepolia Testnet Chain ID
 
 export function useMetamask() {
   const [userAddress, setUserAddress] = useState(null);
@@ -22,10 +22,15 @@ export function useMetamask() {
       }
     };
 
-    const handleChainChanged = (chainId) => {
-      const parsedChainId = parseInt(chainId, 16); // Convert from hex to decimal
-      setNetworkError(parsedChainId !== Number(HARDHAT_NETWORK_ID));
-      window.location.reload();
+    const handleChainChanged = async (chainId) => {
+      const parsedChainId = parseInt(chainId, 16);
+      if (parsedChainId !== Number(SEPOLIA_NETWORK_ID)) {
+        setNetworkError(true);
+        await switchToSepolia(); // Automatically try to switch network
+      } else {
+        setNetworkError(false);
+        window.location.reload();
+      }
     };
 
     ethereum.on("accountsChanged", handleAccountsChanged);
@@ -43,11 +48,11 @@ export function useMetamask() {
       if (!ethereum) throw new Error("MetaMask not found. Please install it.");
 
       const chainId = await ethereum.request({ method: "eth_chainId" });
-      const parsedChainId = parseInt(chainId, 16); // Ensure chainId is in decimal
+      const parsedChainId = parseInt(chainId, 16);
 
-      if (parsedChainId !== Number(HARDHAT_NETWORK_ID)) {
+      if (parsedChainId !== Number(SEPOLIA_NETWORK_ID)) {
         setNetworkError(true);
-        throw new Error(`Wrong network detected: ${parsedChainId}. Please switch to Hardhat (31337).`);
+        await switchToSepolia(); // Prompt user to switch network
       }
 
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
@@ -58,9 +63,42 @@ export function useMetamask() {
 
       setUserAddress(accounts[0]);
       setNetworkError(false);
-      setConnectionStatus("Connected to Hardhat.");
+      setConnectionStatus("Connected to Sepolia.");
     } catch (error) {
       alert(error.message);
+    }
+  };
+
+  const switchToSepolia = async () => {
+    try {
+      const { ethereum } = window;
+      if (!ethereum) throw new Error("MetaMask not found. Please install it.");
+
+      await ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0x" + Number(SEPOLIA_NETWORK_ID).toString(16) }], // Convert to hex
+      });
+
+      setNetworkError(false);
+      window.location.reload(); // Refresh page after switching network
+    } catch (error) {
+      if (error.code === 4902) {
+        // If Sepolia is not added, prompt user to add it
+        await ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [
+            {
+              chainId: "0x" + Number(SEPOLIA_NETWORK_ID).toString(16),
+              chainName: "Ethereum Sepolia Testnet",
+              rpcUrls: ["https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID"], // Replace with your Infura ID
+              nativeCurrency: { name: "Sepolia ETH", symbol: "ETH", decimals: 18 },
+              blockExplorerUrls: ["https://sepolia.etherscan.io/"],
+            },
+          ],
+        });
+      } else {
+        console.error("Error switching network:", error);
+      }
     }
   };
 
