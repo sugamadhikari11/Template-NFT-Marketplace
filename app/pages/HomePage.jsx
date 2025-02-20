@@ -93,20 +93,13 @@ export default function HomePage() {
             {allAuctions.map((auction, index) => (
               <motion.div
                 key={auction.id}
-                className="absolute w-64 h-80 rounded-lg shadow-xl overflow-hidden cursor-pointer flex flex-col items-center bg-white"
+                className="absolute w-64 h-80 rounded-lg shadow-2xl pb-4 overflow-hidden cursor-pointer flex flex-col items-center bg-transparent"
                 variants={itemVariants}
                 custom={index}
                 initial="enter"
                 animate={index === activeIndex ? "center" : "exit"}
                 onClick={() => handleImageClick(index)}
               >
-               <a
-                  href={`/auction/${auction.id}`}
-                  className="relative px-6 py-3 font-bold text-white bg-orange-300 rounded-md transition-all duration-300 ease-in-out hover:bg-orange-500 group"
-                >
-                  View Auction
-                  <span className="absolute inset-0 w-full h-full bg-transparent border-2 border-white rounded-md animate-wave"></span>
-                </a>
 
                 {auction.image ? (
                   <img

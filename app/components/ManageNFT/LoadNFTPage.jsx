@@ -74,7 +74,7 @@ const AddNFT = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 rounded-lg shadow-md">
+    <div className="max-w-2xl mx-auto mt-10 p-6 rounded-lg shadow-md mb-20">
       <h2 className="text-2xl font-bold mb-4">Add NFT to Auction</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -131,13 +131,10 @@ const AddNFT = () => {
         </button>
 
         {nftData && (
-          <div className="mt-4">
-            <p className="text-sm text-gray-600">NFT Metadata:</p>
-            <pre className="mt-2 p-2 bg-gray-200 rounded-md text-sm">
-              {JSON.stringify(nftData, null, 2)}
-            </pre>
+          <div className="mt-5 font-bold">
+            <p className="text-md text-gray-600">NFT Image:</p>
             {nftData.image && (
-              <img src={nftData.image} alt="NFT" className="mt-2 w-full rounded-md" />
+              <img src={nftData.image} alt="NFT" className=" w-full h-45 rounded-md" />
             )}
           </div>
         )}

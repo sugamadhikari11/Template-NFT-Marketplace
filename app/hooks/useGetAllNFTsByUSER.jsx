@@ -47,7 +47,9 @@ const useGetAllNFTsByUser = (provider, userAddress) => {
           description: nft.description,
           image,
           initialPrice: ethers.formatEther(nft.initialPrice),
+          highestBid: ethers.formatEther(nft.highestBid),
           status: mapStatus(parseInt(nft.status)),  
+          endTime: nft.endTime
         };
       }));
 

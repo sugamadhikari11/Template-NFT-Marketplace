@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import useGetAllNFTsByUser from "../../hooks/useGetAllNFTsByUSER";
-import useStartEndAuction from "../../hooks/useStartEndAuction"; // Import the custom hook
+import useStartEndAuction from "../../hooks/useStartEndAuction";
 
 const MyNFTs = () => {
   const [provider, setProvider] = useState(null);
@@ -13,238 +13,131 @@ const MyNFTs = () => {
     Ended: [],
     Revoked: [],
   });
-
   const [showModal, setShowModal] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState(null);
   const [startingPrice, setStartingPrice] = useState("");
   const [duration, setDuration] = useState("");
+  const [loadingNFT, setLoadingNFT] = useState(null);
 
-  // Load provider and address
   useEffect(() => {
     if (!window.ethereum) return;
 
     const loadProvider = async () => {
       const web3Provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await web3Provider.getSigner();
-      const address = await signer.getAddress();
-
       setProvider(web3Provider);
-      setUserAddress(address);
+      setUserAddress(await signer.getAddress());
     };
-
     loadProvider();
   }, []);
 
-  // Fetch NFTs by user
   const { nfts, loading, error, refetchNFTs } = useGetAllNFTsByUser(provider, userAddress);
+  const { startAuction, revokeAuction, endAuction, loading: auctionLoading, error: auctionError } = useStartEndAuction(provider, userAddress);
 
   useEffect(() => {
     if (nfts) {
-      const categorized = {
-        Pending: [],
-        Active: [],
-        Ended: [],
-        Revoked: [],
-      };
-
-      nfts.forEach((nft) => {
-        if (nft.status === "Pending") categorized.Pending.push(nft);
-        else if (nft.status === "Active") categorized.Active.push(nft);
-        else if (nft.status === "Ended") categorized.Ended.push(nft);
-        else if (nft.status === "Revoked") categorized.Revoked.push(nft);
-      });
-
+      const categorized = { Pending: [], Active: [], Ended: [], Revoked: [] };
+      nfts.forEach((nft) => categorized[nft.status]?.push(nft));
       setCategorizedNFTs(categorized);
     }
   }, [nfts]);
-
-  // Get start/end auction functions from the custom hook
-  const { startAuction, revokeAuction, endAuction, loading: auctionLoading, error: auctionError } = useStartEndAuction(provider, userAddress);
-
-  const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target.value);
-  };
 
   const handleStartAuction = (nft) => {
     setSelectedNFT(nft);
     setShowModal(true);
   };
 
-  const handleModalClose = () => {
-    setShowModal(false);
-    setStartingPrice("");
-    setDuration("");
-  };
-
   const handleSubmitAuction = async () => {
-    if (startingPrice <= 0 || duration <= 0) {
-      alert("Starting price and duration must be greater than 0.");
-      return;
-    }
-  
-    console.log("Submitting auction with the following details:");
-    console.log("Token ID:", selectedNFT.id);
-    console.log("Starting Price:", startingPrice);
-    console.log("Duration:", duration);
-  
+    if (!startingPrice || !duration) return alert("Provide valid price and duration.");
+    const auctionDuration = Math.floor((new Date(duration).getTime() - Date.now()) / 1000);
+    if (auctionDuration <= 0) return alert("Auction must be set for the future.");
     try {
-      await startAuction(selectedNFT.id, ethers.parseUnits(startingPrice), duration);
-      console.log("Auction started successfully");
-      handleModalClose(); // Close the modal after starting auction
-      refetchNFTs(); // Refetch NFTs after the auction has been started
+      setLoadingNFT(selectedNFT.id);
+      await startAuction(selectedNFT.id, ethers.parseUnits(startingPrice), auctionDuration);
+      handleModalClose();
+      refetchNFTs();
     } catch (err) {
-      console.error("Error starting auction:", err);
-      alert("Failed to start auction. Check the console for errors.");
+      alert("Failed to start auction.");
+    } finally {
+      setLoadingNFT(null);
     }
   };
 
   const handleRevokeAuction = async (id) => {
     try {
+      setLoadingNFT(id);
       await revokeAuction(id);
-      console.log("Auction revoked successfully!");
-      refetchNFTs(); // Refresh the list of NFTs after revocation
-    } catch (error) {
-      console.error("Error revoking auction:", error);
+      refetchNFTs();
+    } catch {
       alert("Failed to revoke auction.");
-    } 
-  };
-  const handleEndAuction = async (id) => {
-    try {
-      await endAuction(id);
-      console.log("Auction ended successfully!");
-      refetchNFTs(); // Refresh the list of NFTs after ending the auction
-    } catch (error) {
-      console.error("Error ending auction:", error);
-      alert("Failed to end auction.");
+    } finally {
+      setLoadingNFT(null);
     }
   };
-  
-  
+
+  const handleEndAuction = async (id, endTime) => {
+    const currentTime = Math.floor(Date.now() / 1000);
+  if (endTime > currentTime) {
+    return alert("Auction cannot be ended before its designated time.");
+  }
+    try {
+      setLoadingNFT(id);
+      await endAuction(id);
+      refetchNFTs();
+    } catch {
+      alert("Failed to end auction.");
+    } finally {
+      setLoadingNFT(null);
+    }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 rounded-lg shadow-md">
+    <div className="max-w-6xl mx-auto mt-10 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">My Auction NFTs</h2>
-
       {loading && <p>Loading NFTs...</p>}
       {error && <p className="text-red-500">{error}</p>}
-
-      <div className="mb-6">
-        <select
-          value={selectedCategory}
-          onChange={handleCategoryChange}
-          className="border bg-transparent p-2 rounded-lg"
-        >
-          <option value="Pending">Pending</option>
-          <option value="Active">Active</option>
-          <option value="Ended">Ended</option>
-          <option value="Revoked">Revoked</option>
-        </select>
-      </div>
-
-      <div>
-        <h3 className="text-xl font-bold mb-4">
-          {selectedCategory} ({categorizedNFTs[selectedCategory].length})
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          {categorizedNFTs[selectedCategory].map((nft) => {
-            return (
-              <div key={nft.tokenId} className="border p-4 rounded-lg">
-                {nft.image ? (
-                  <img
-                    src={nft.image}
-                    alt={nft.description}
-                    className="w-full h-40 object-cover rounded-md"
-                  />
-                ) : (
-                  <p>No image available</p>
-                )}
-                <h3 className="text-lg font-semibold mt-2">{nft.description}</h3>
-                <p className="text-xs text-gray-400">ID: {nft.id}</p>
-                <p className="text-xs text-gray-400">Token ID: {nft.tokenId}</p>
-                <p className="text-sm font-bold">Price: {nft.initialPrice} ETH</p>
-                <p className="text-sm text-gray-500">Status: {nft.status}</p>
-
-                {/* Show Start or End Auction Button */}
-                {nft.status === "Pending" && (
-                  <div className="flex gap-2">
-                  {/* Start Auction Button */}
-                  <button
-                    onClick={() => handleStartAuction(nft)}
-                    className="px-4 py-2 bg-green-500 text-white rounded-lg"
-                    disabled={auctionLoading}
-                  >
-                    {auctionLoading ? "Starting..." : "Start Auction"}
-                  </button>
-              
-                  {/* Revoke Auction Button */}
-                  <button
-                    onClick={() => handleRevokeAuction(nft.id)}
-                    className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                    disabled={auctionLoading}
-                  >
-                    {auctionLoading ? "Revoking..." : "Revoke"}
-                  </button>
-                </div>
-                  
-
-                )}
-
-                {nft.status === "Active" && (
-                  <button
-                    onClick={() => handleEndAuction(nft.id)}
-                    className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg"
-                    disabled={auctionLoading}
-                  >
-                    {auctionLoading ? "Ending..." : "End Auction"}
-                  </button>
-                )}
-
-                {auctionError && (
-                  <p className="text-red-500 mt-2">{auctionError}</p>
-                )}
+      <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="border p-2 bg-transparent rounded-lg">
+        {Object.keys(categorizedNFTs).map((category) => (
+          <option key={category} value={category}>{category}</option>
+        ))}
+      </select>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
+        {categorizedNFTs[selectedCategory].map((nft) => (
+          <div key={nft.tokenId} className="border p-4 rounded-lg">
+            <img src={nft.image || "default.jpg"} alt={nft.description} className="w-full h-40 object-cover rounded-md" />
+            <h3 className="text-lg font-semibold mt-2">{nft.description}</h3>
+            <p className="text-sm">Original Price: {nft.initialPrice} ETH</p>
+            <p className="text-sm">Highest BidPrice: {nft.highestBid} ETH</p>
+            {nft.status === "Pending" && (
+              <div className="flex gap-2">
+                <button onClick={() => handleStartAuction(nft)} className="px-4 py-2 bg-green-500 text-white rounded-lg" disabled={loadingNFT === nft.id}>
+                  {loadingNFT === nft.id ? "Starting..." : "Start Auction"}
+                </button>
+                <button onClick={() => handleRevokeAuction(nft.id)} className="px-4 py-2 bg-red-500 text-white rounded-lg" disabled={loadingNFT === nft.id}>
+                  {loadingNFT === nft.id ? "Revoking..." : "Revoke"}
+                </button>
               </div>
-            );
-          })}
-        </div>
+            )}
+            {nft.status === "Active" && (
+              <button onClick={() => handleEndAuction(nft.id, nft.endTime)} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg" disabled={loadingNFT === nft.id}>
+                {loadingNFT === nft.id ? "Ending..." : "End Auction"}
+              </button>
+            )}
+          </div>
+        ))}
       </div>
-
-      {/* Modal for Start Auction */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full">
             <h2 className="text-xl font-bold mb-4">Start Auction for NFT #{selectedNFT.tokenId}</h2>
-            <input
-              type="number"
-              placeholder="Starting Price (ETH)"
-              value={startingPrice}
-              onChange={(e) => setStartingPrice(e.target.value)}
-              className="border p-2 w-full mb-4 rounded-lg"
-            />
-            <input
-              type="number"
-              placeholder="Duration (seconds)"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              className="border p-2 w-full mb-4 rounded-lg"
-            />
+            <input type="number" placeholder="Starting Price (ETH)" value={startingPrice} onChange={(e) => setStartingPrice(e.target.value)} className="border p-2 w-full mb-4 rounded-lg" />
+            <input type="date" value={duration} onChange={(e) => setDuration(e.target.value)} className="border p-2 w-full mb-4 rounded-lg" />
             <div className="flex justify-between">
-              <button
-                onClick={handleSubmitAuction}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg"
-                disabled={auctionLoading}
-              >
-                {auctionLoading ? "Starting..." : "Start Auction"}
+              <button onClick={handleSubmitAuction} className="px-4 py-2 bg-green-500 text-white rounded-lg" disabled={loadingNFT === selectedNFT.id}>
+                {loadingNFT === selectedNFT.id ? "Starting..." : "Start Auction"}
               </button>
-              <button
-                onClick={handleModalClose}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg"
-              >
-                Cancel
-              </button>
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-500 text-white rounded-lg">Cancel</button>
             </div>
-            {auctionError && (
-              <p className="text-red-500 mt-2">{auctionError}</p>
-            )}
           </div>
         </div>
       )}

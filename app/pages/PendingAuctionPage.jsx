@@ -19,13 +19,13 @@ const PendingAuctions = () => {
   const { auctions, loading, error } = useGetAllAuctionsByStatus(provider, "Pending");
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 rounded-lg shadow-md">
+    <div className="max-w-6xl mx-auto mt-10 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Pending Auctions</h2>
       {loading && <p>Loading pending auctions...</p>}
       {error && <p className="text-red-500">{error}</p>}
       {!loading && auctions.length === 0 && <p>No pending auctions available.</p>}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {auctions.map((auction) => (
           <div key={auction.id} className="border p-4 rounded-lg">
             {auction.image ? (

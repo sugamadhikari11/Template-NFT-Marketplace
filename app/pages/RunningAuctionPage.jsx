@@ -35,13 +35,13 @@ const RunningAuctions = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 rounded-lg shadow-md">
+    <div className="max-w-6xl mx-auto mt-10 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4">Running Auctions</h2>
       {loading && <p>Loading active auctions...</p>}
       {error && <p className="text-red-500">{error}</p>}
       {!loading && auctions.length === 0 && <p>No active auctions available.</p>}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {auctions.map((auction) => (
           <div key={auction.id} className="border p-4 rounded-lg">
             {auction.image ? (
@@ -53,9 +53,12 @@ const RunningAuctions = () => {
             ) : (
               <p>No image available</p>
             )}
-            <h3 className="text-lg font-semibold mt-2">{auction.description}</h3>
-            <p className="text-xs text-gray-400">Token ID: {auction.tokenId}</p>
-            <p className="text-sm font-bold">Starting Price: {auction.highestBid} ETH</p>
+            <h3 className="text-lg font-semibold mt-2 text-center mb-2">{auction.description}</h3>
+            <hr className="mb-2"></hr>
+            <p className="text-xs font-bold text-gray-400">Token ID: {auction.tokenId}</p>
+            <p className="text-sm font-bold">Starting Price: {auction.startingPrice} ETH</p>
+            <p className="text-sm font-bold">Highest Bid: {auction.highestBid} ETH</p>
+            <p className="text-sm text-gray-500">Endtime: {auction.auctionEndTime}</p>
             <p className="text-sm text-gray-500">Status: {auction.status}</p>
 
             {/* Place Bid Button */}
